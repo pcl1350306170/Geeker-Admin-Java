@@ -15,8 +15,10 @@ spring:
 # 文件上传配置
 app:
   upload:
-    # 上传文件存储目录（相对于项目运行目录）
-    path: ./uploads
+    # 上传文件存储目录（image-cdn 仓库，手动 push 后通过 jsDelivr 访问）
+    path: D:\CODE\image-cdn\Upload
+    # 返回给前端的 CDN 地址前缀
+    cdn-prefix: https://cdn.jsdelivr.net/gh/pcl1350306170/image-cdn@refs/heads/main/Upload
 
 mybatis-plus:
   configuration:
