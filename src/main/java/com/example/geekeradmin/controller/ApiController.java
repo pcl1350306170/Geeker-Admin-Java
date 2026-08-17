@@ -6,6 +6,7 @@ import com.example.geekeradmin.dto.LoginRespDTO;
 import com.example.geekeradmin.entity.SysMenu;
 import com.example.geekeradmin.entity.SysUser;
 import com.example.geekeradmin.service.MenuService;
+import com.example.geekeradmin.service.RoleService;
 import com.example.geekeradmin.service.UserService;
 import com.example.geekeradmin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,10 +64,17 @@ public class ApiController {
     @GetMapping("/auth/buttons")
     public Result<Map<String, List<String>>> getAuthButtons() {
         Map<String, List<String>> buttons = new HashMap<>();
-        buttons.put("useProTable", Arrays.asList("add", "batchAdd", "export", "batchDelete", "status"));
-        buttons.put("authButton", Arrays.asList("add", "edit", "delete", "import", "export"));
-        buttons.put("authMenu", Arrays.asList("add", "edit", "delete"));
-        buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
+        if (RoleService.ROLE_ADMIN.equals(menuService.getCurrentUserRole())) {
+            // 超级管理员：全部按钮权限
+            buttons.put("useProTable", Arrays.asList("add", "batchAdd", "export", "batchDelete", "status"));
+            buttons.put("authButton", Arrays.asList("add", "edit", "delete", "import", "export"));
+            buttons.put("authMenu", Arrays.asList("add", "edit", "delete"));
+            buttons.put("roleManage", List.of("menus"));
+            buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
+        } else {
+            // 普通用户：仅保留只读性质的按钮
+            buttons.put("useProTable", List.of("export"));
+        }
         return Result.success(buttons);
     }
 

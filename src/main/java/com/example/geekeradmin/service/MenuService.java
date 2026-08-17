@@ -3,8 +3,11 @@ package com.example.geekeradmin.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.geekeradmin.entity.MenuMeta;
 import com.example.geekeradmin.entity.SysMenu;
+import com.example.geekeradmin.entity.SysUser;
 import com.example.geekeradmin.mapper.SysMenuMapper;
+import com.example.geekeradmin.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -16,11 +19,20 @@ public class MenuService {
     @Autowired
     private SysMenuMapper menuMapper;
 
+    @Autowired
+    private SysUserMapper userMapper;
+
+    @Autowired
+    private RoleService roleService;
+
     /**
-     * 登录后的动态路由菜单（仅启用状态，带 meta 结构）
+     * 登录后的动态路由菜单（仅启用状态 + 当前角色可见，带 meta 结构）
      */
     public List<SysMenu> getMenuList() {
-        List<SysMenu> allMenus = menuMapper.selectAllEnabled();
+        String role = getCurrentUserRole();
+        List<SysMenu> allMenus = menuMapper.selectAllEnabled().stream()
+                .filter(menu -> RoleService.ROLE_ADMIN.equals(role) || roleService.containsRole(menu.getRoles(), role))
+                .toList();
         allMenus.forEach(menu -> {
             MenuMeta meta = new MenuMeta();
             meta.setIcon(menu.getIcon());
@@ -34,6 +46,19 @@ public class MenuService {
             menu.setMeta(meta);
         });
         return buildTree(allMenus, 0L);
+    }
+
+    /**
+     * 获取当前登录用户的角色（取不到时按普通用户处理）
+     */
+    public String getCurrentUserRole() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication == null ? null : authentication.getPrincipal();
+        if (principal == null) {
+            return RoleService.ROLE_USER;
+        }
+        SysUser user = userMapper.selectByUsername(principal.toString());
+        return user == null || !StringUtils.hasText(user.getRole()) ? RoleService.ROLE_USER : user.getRole();
     }
 
     /**
@@ -58,6 +83,9 @@ public class MenuService {
         }
         if (menu.getStatus() == null) {
             menu.setStatus(1);
+        }
+        if (!StringUtils.hasText(menu.getRoles())) {
+            menu.setRoles("admin,user");
         }
         menuMapper.insert(menu);
     }

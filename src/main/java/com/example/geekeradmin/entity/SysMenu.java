@@ -25,6 +25,8 @@ public class SysMenu {
     private String activeMenu;
     private Integer sort;
     private Integer status;
+    /** 可查看该菜单的角色编码（逗号分隔，如 admin,user） */
+    private String roles;
 
     @TableField(exist = false)
     private List<SysMenu> children;
