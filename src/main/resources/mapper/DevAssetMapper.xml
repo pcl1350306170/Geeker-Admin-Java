@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.geekeradmin.mapper.DevAssetMapper">
+
+    <sql id="listColumns">
+        id, title, type, description, language, tags, is_favorite, usage_count, parent_id, created_by, created_at, updated_at
+    </sql>
+
+    <!-- 多关键词模糊搜索：每个关键词都必须在任意字段命中，按字段权重累计得分排序 -->
+    <select id="searchAssetPage" resultType="com.example.geekeradmin.entity.DevAsset">
+        SELECT
+        <include refid="listColumns"/>,
+        <choose>
+            <when test="keywords != null and keywords.size() > 0">
+                <foreach collection="keywords" item="kw" separator=" + ">
+                    (
+                    (CASE WHEN title LIKE CONCAT('%', #{kw}, '%') THEN 4 ELSE 0 END) +
+                    (CASE WHEN tags LIKE CONCAT('%', #{kw}, '%') THEN 3 ELSE 0 END) +
+                    (CASE WHEN description LIKE CONCAT('%', #{kw}, '%') THEN 2 ELSE 0 END) +
+                    (CASE WHEN content LIKE CONCAT('%', #{kw}, '%') THEN 1 ELSE 0 END) +
+                    (CASE WHEN language LIKE CONCAT('%', #{kw}, '%') THEN 1 ELSE 0 END)
+                    )
+                </foreach>
+                AS match_score
+            </when>
+            <otherwise>
+                0 AS match_score
+            </otherwise>
+        </choose>
+        FROM dev_asset
+        WHERE deleted = 0
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        <if test="tag != null and tag != ''">
+            AND tags LIKE CONCAT('%', #{tag}, '%')
+        </if>
+        <if test="isFavorite != null">
+            AND is_favorite = #{isFavorite}
+        </if>
+        <if test="keywords != null and keywords.size() > 0">
+            <foreach collection="keywords" item="kw">
+                AND (
+                    title LIKE CONCAT('%', #{kw}, '%')
+                    OR tags LIKE CONCAT('%', #{kw}, '%')
+                    OR description LIKE CONCAT('%', #{kw}, '%')
+                    OR content LIKE CONCAT('%', #{kw}, '%')
+                    OR language LIKE CONCAT('%', #{kw}, '%')
+                )
+            </foreach>
+        </if>
+        ORDER BY match_score DESC, updated_at DESC
+    </select>
+
+    <!-- 最近使用：按使用记录倒序，同一资产只取最近一次 -->
+    <select id="selectRecentUsed" resultType="com.example.geekeradmin.entity.DevAsset">
+        SELECT
+        <include refid="listColumns"/>
+        FROM dev_asset a
+        INNER JOIN (
+            SELECT asset_id, MAX(created_at) AS last_used
+            FROM dev_asset_usage
+            GROUP BY asset_id
+        ) u ON a.id = u.asset_id
+        WHERE a.deleted = 0
+        ORDER BY u.last_used DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
