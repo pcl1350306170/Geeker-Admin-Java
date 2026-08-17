@@ -5,6 +5,7 @@ import com.example.geekeradmin.dto.LoginDTO;
 import com.example.geekeradmin.dto.LoginRespDTO;
 import com.example.geekeradmin.entity.SysMenu;
 import com.example.geekeradmin.entity.SysUser;
+import com.example.geekeradmin.service.MenuService;
 import com.example.geekeradmin.service.UserService;
 import com.example.geekeradmin.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,9 @@ public class ApiController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MenuService menuService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -53,7 +57,7 @@ public class ApiController {
 
     @GetMapping("/menu/list")
     public Result<List<SysMenu>> getMenuList() {
-        return Result.success(userService.getMenuList());
+        return Result.success(menuService.getMenuList());
     }
 
     @GetMapping("/auth/buttons")
@@ -61,6 +65,7 @@ public class ApiController {
         Map<String, List<String>> buttons = new HashMap<>();
         buttons.put("useProTable", Arrays.asList("add", "batchAdd", "export", "batchDelete", "status"));
         buttons.put("authButton", Arrays.asList("add", "edit", "delete", "import", "export"));
+        buttons.put("authMenu", Arrays.asList("add", "edit", "delete"));
         buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
         return Result.success(buttons);
     }
