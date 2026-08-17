@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @TableName("sys_user")
 public class SysUser {
@@ -15,4 +17,5 @@ public class SysUser {
     private String nickname;
     private String avatar;
     private Integer status;
+    private LocalDateTime createTime;
 }

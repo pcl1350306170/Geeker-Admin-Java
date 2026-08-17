@@ -28,6 +28,9 @@ public class ApiController {
     public Result<LoginRespDTO> login(@RequestBody LoginDTO dto) {
         SysUser user = userService.findByUsername(dto.getUsername());
         if (user != null && BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
+            if (user.getStatus() != null && user.getStatus() == 0) {
+                throw new RuntimeException("该账号已被禁用，请联系管理员");
+            }
             String token = jwtUtil.generateToken(user.getUsername());
             return Result.success(new LoginRespDTO(token));
         }
@@ -58,6 +61,7 @@ public class ApiController {
         Map<String, List<String>> buttons = new HashMap<>();
         buttons.put("useProTable", Arrays.asList("add", "batchAdd", "export", "batchDelete", "status"));
         buttons.put("authButton", Arrays.asList("add", "edit", "delete", "import", "export"));
+        buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
         return Result.success(buttons);
     }
 
