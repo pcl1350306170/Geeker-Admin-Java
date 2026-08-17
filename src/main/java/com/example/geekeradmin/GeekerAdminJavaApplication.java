@@ -1,4 +1,4 @@
-package com.example.geeker_admin_java;
+package com.example.geekeradmin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

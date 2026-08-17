@@ -1,0 +1,86 @@
+-- ============================================
+-- Geeker-Admin 菜单数据
+-- 基于前端 authMenuList.json 生成
+-- ============================================
+
+USE geeker_admin;
+
+-- 清空现有菜单数据
+TRUNCATE TABLE sys_menu;
+
+-- 插入菜单数据
+INSERT INTO sys_menu (id, parent_id, path, name, component, redirect, icon, title, is_link, is_hide, is_full, is_affix, is_keep_alive, active_menu, sort, status) VALUES
+(1, 0, '/home/index', 'home', '/home/index', '', 'HomeFilled', '首页', '', 0, 0, 1, 1, '', 1, 1),
+(2, 0, '/dataScreen', 'dataScreen', '/dataScreen/index', '', 'Histogram', '数据大屏', '', 0, 1, 0, 1, '', 2, 1),
+(3, 0, '/proTable', 'proTable', '', '/proTable/useProTable', 'MessageBox', '超级表格', '', 0, 0, 0, 1, '', 3, 1),
+(4, 3, '/proTable/useProTable', 'useProTable', '/proTable/useProTable/index', '', 'Menu', '使用 ProTable', '', 0, 0, 0, 1, '', 1, 1),
+(5, 4, '/proTable/useProTable/detail/:id', 'useProTableDetail', '/proTable/useProTable/detail', '', 'Menu', 'ProTable 详情', '', 1, 0, 0, 1, '/proTable/useProTable', 1, 1),
+(6, 3, '/proTable/useTreeFilter', 'useTreeFilter', '/proTable/useTreeFilter/index', '', 'Menu', '使用 TreeFilter', '', 0, 0, 0, 1, '', 2, 1),
+(7, 3, '/proTable/useTreeFilter/detail/:id', 'useTreeFilterDetail', '/proTable/useTreeFilter/detail', '', 'Menu', 'TreeFilter 详情', '', 1, 0, 0, 1, '/proTable/useTreeFilter', 3, 1),
+(8, 3, '/proTable/useSelectFilter', 'useSelectFilter', '/proTable/useSelectFilter/index', '', 'Menu', '使用 SelectFilter', '', 0, 0, 0, 1, '', 4, 1),
+(9, 3, '/proTable/treeProTable', 'treeProTable', '/proTable/treeProTable/index', '', 'Menu', '树形 ProTable', '', 0, 0, 0, 1, '', 5, 1),
+(10, 3, '/proTable/complexProTable', 'complexProTable', '/proTable/complexProTable/index', '', 'Menu', '复杂 ProTable', '', 0, 0, 0, 1, '', 6, 1),
+(11, 3, '/proTable/document', 'proTableDocument', '/proTable/document/index', '', 'Menu', 'ProTable 文档', 'https://juejin.cn/post/7166068828202336263/#heading-14', 0, 0, 0, 1, '', 7, 1),
+(12, 0, '/auth', 'auth', '', '/auth/menu', 'Lock', '权限管理', '', 0, 0, 0, 1, '', 4, 1),
+(13, 12, '/auth/menu', 'authMenu', '/auth/menu/index', '', 'Menu', '菜单权限', '', 0, 0, 0, 1, '', 1, 1),
+(14, 12, '/auth/button', 'authButton', '/auth/button/index', '', 'Menu', '按钮权限', '', 0, 0, 0, 1, '', 2, 1),
+(15, 0, '/assembly', 'assembly', '', '/assembly/guide', 'Briefcase', '常用组件', '', 0, 0, 0, 1, '', 5, 1),
+(16, 15, '/assembly/guide', 'guide', '/assembly/guide/index', '', 'Menu', '引导页', '', 0, 0, 0, 1, '', 1, 1),
+(17, 15, '/assembly/tabs', 'tabs', '/assembly/tabs/index', '', 'Menu', '标签页操作', '', 0, 0, 0, 1, '', 2, 1),
+(18, 17, '/assembly/tabs/detail/:id', 'tabsDetail', '/assembly/tabs/detail', '', 'Menu', 'Tab 详情', '', 1, 0, 0, 1, '/assembly/tabs', 1, 1),
+(19, 15, '/assembly/selectIcon', 'selectIcon', '/assembly/selectIcon/index', '', 'Menu', '图标选择器', '', 0, 0, 0, 1, '', 3, 1),
+(20, 15, '/assembly/selectFilter', 'selectFilter', '/assembly/selectFilter/index', '', 'Menu', '分类筛选器', '', 0, 0, 0, 1, '', 4, 1),
+(21, 15, '/assembly/treeFilter', 'treeFilter', '/assembly/treeFilter/index', '', 'Menu', '树形筛选器', '', 0, 0, 0, 1, '', 5, 1),
+(22, 15, '/assembly/svgIcon', 'svgIcon', '/assembly/svgIcon/index', '', 'Menu', 'SVG 图标', '', 0, 0, 0, 1, '', 6, 1),
+(23, 15, '/assembly/uploadFile', 'uploadFile', '/assembly/uploadFile/index', '', 'Menu', '文件上传', '', 0, 0, 0, 1, '', 7, 1),
+(24, 15, '/assembly/batchImport', 'batchImport', '/assembly/batchImport/index', '', 'Menu', '批量添加数据', '', 0, 0, 0, 1, '', 8, 1),
+(25, 15, '/assembly/wangEditor', 'wangEditor', '/assembly/wangEditor/index', '', 'Menu', '富文本编辑器', '', 0, 0, 0, 1, '', 9, 1),
+(26, 15, '/assembly/draggable', 'draggable', '/assembly/draggable/index', '', 'Menu', '拖拽组件', '', 0, 0, 0, 1, '', 10, 1),
+(27, 0, '/dashboard', 'dashboard', '', '/dashboard/dataVisualize', 'Odometer', 'Dashboard', '', 0, 0, 0, 1, '', 6, 1),
+(28, 27, '/dashboard/dataVisualize', 'dataVisualize', '/dashboard/dataVisualize/index', '', 'Menu', '数据可视化', '', 0, 0, 0, 1, '', 1, 1),
+(29, 0, '/form', 'form', '', '/form/proForm', 'Tickets', '表单 Form', '', 0, 0, 0, 1, '', 7, 1),
+(30, 29, '/form/proForm', 'proForm', '/form/proForm/index', '', 'Menu', '超级 Form', '', 0, 0, 0, 1, '', 1, 1),
+(31, 29, '/form/basicForm', 'basicForm', '/form/basicForm/index', '', 'Menu', '基础 Form', '', 0, 0, 0, 1, '', 2, 1),
+(32, 29, '/form/validateForm', 'validateForm', '/form/validateForm/index', '', 'Menu', '校验 Form', '', 0, 0, 0, 1, '', 3, 1),
+(33, 29, '/form/dynamicForm', 'dynamicForm', '/form/dynamicForm/index', '', 'Menu', '动态 Form', '', 0, 0, 0, 1, '', 4, 1),
+(34, 0, '/echarts', 'echarts', '', '/echarts/waterChart', 'TrendCharts', 'ECharts', '', 0, 0, 0, 1, '', 8, 1),
+(35, 34, '/echarts/waterChart', 'waterChart', '/echarts/waterChart/index', '', 'Menu', '水型图', '', 0, 0, 0, 1, '', 1, 1),
+(36, 34, '/echarts/columnChart', 'columnChart', '/echarts/columnChart/index', '', 'Menu', '柱状图', '', 0, 0, 0, 1, '', 2, 1),
+(37, 34, '/echarts/lineChart', 'lineChart', '/echarts/lineChart/index', '', 'Menu', '折线图', '', 0, 0, 0, 1, '', 3, 1),
+(38, 34, '/echarts/pieChart', 'pieChart', '/echarts/pieChart/index', '', 'Menu', '饼图', '', 0, 0, 0, 1, '', 4, 1),
+(39, 34, '/echarts/radarChart', 'radarChart', '/echarts/radarChart/index', '', 'Menu', '雷达图', '', 0, 0, 0, 1, '', 5, 1),
+(40, 34, '/echarts/nestedChart', 'nestedChart', '/echarts/nestedChart/index', '', 'Menu', '嵌套环形图', '', 0, 0, 0, 1, '', 6, 1),
+(41, 0, '/directives', 'directives', '', '/directives/copyDirect', 'Stamp', '自定义指令', '', 0, 0, 0, 1, '', 9, 1),
+(42, 41, '/directives/copyDirect', 'copyDirect', '/directives/copyDirect/index', '', 'Menu', '复制指令', '', 0, 0, 0, 1, '', 1, 1),
+(43, 41, '/directives/watermarkDirect', 'watermarkDirect', '/directives/watermarkDirect/index', '', 'Menu', '水印指令', '', 0, 0, 0, 1, '', 2, 1),
+(44, 41, '/directives/dragDirect', 'dragDirect', '/directives/dragDirect/index', '', 'Menu', '拖拽指令', '', 0, 0, 0, 1, '', 3, 1),
+(45, 41, '/directives/debounceDirect', 'debounceDirect', '/directives/debounceDirect/index', '', 'Menu', '防抖指令', '', 0, 0, 0, 1, '', 4, 1),
+(46, 41, '/directives/throttleDirect', 'throttleDirect', '/directives/throttleDirect/index', '', 'Menu', '节流指令', '', 0, 0, 0, 1, '', 5, 1),
+(47, 41, '/directives/longpressDirect', 'longpressDirect', '/directives/longpressDirect/index', '', 'Menu', '长按指令', '', 0, 0, 0, 1, '', 6, 1),
+(48, 0, '/menu', 'menu', '', '/menu/menu1', 'List', '菜单嵌套', '', 0, 0, 0, 1, '', 10, 1),
+(49, 48, '/menu/menu1', 'menu1', '/menu/menu1/index', '', 'Menu', '菜单1', '', 0, 0, 0, 1, '', 1, 1),
+(50, 48, '/menu/menu2', 'menu2', '', '/menu/menu2/menu21', 'Menu', '菜单2', '', 0, 0, 0, 1, '', 2, 1),
+(51, 50, '/menu/menu2/menu21', 'menu21', '/menu/menu2/menu21/index', '', 'Menu', '菜单2-1', '', 0, 0, 0, 1, '', 1, 1),
+(52, 50, '/menu/menu2/menu22', 'menu22', '', '/menu/menu2/menu22/menu221', 'Menu', '菜单2-2', '', 0, 0, 0, 1, '', 2, 1),
+(53, 52, '/menu/menu2/menu22/menu221', 'menu221', '/menu/menu2/menu22/menu221/index', '', 'Menu', '菜单2-2-1', '', 0, 0, 0, 1, '', 1, 1),
+(54, 52, '/menu/menu2/menu22/menu222', 'menu222', '/menu/menu2/menu22/menu222/index', '', 'Menu', '菜单2-2-2', '', 0, 0, 0, 1, '', 2, 1),
+(55, 50, '/menu/menu2/menu23', 'menu23', '/menu/menu2/menu23/index', '', 'Menu', '菜单2-3', '', 0, 0, 0, 1, '', 3, 1),
+(56, 48, '/menu/menu3', 'menu3', '/menu/menu3/index', '', 'Menu', '菜单3', '', 0, 0, 0, 1, '', 3, 1),
+(57, 0, '/system', 'system', '', '/system/accountManage', 'Tools', '系统管理', '', 0, 0, 0, 1, '', 11, 1),
+(58, 57, '/system/accountManage', 'accountManage', '/system/accountManage/index', '', 'Menu', '账号管理', '', 0, 0, 0, 1, '', 1, 1),
+(59, 57, '/system/roleManage', 'roleManage', '/system/roleManage/index', '', 'Menu', '角色管理', '', 0, 0, 0, 1, '', 2, 1),
+(60, 57, '/system/menuMange', 'menuMange', '/system/menuMange/index', '', 'Menu', '菜单管理', '', 0, 0, 0, 1, '', 3, 1),
+(61, 57, '/system/departmentManage', 'departmentManage', '/system/departmentManage/index', '', 'Menu', '部门管理', '', 0, 0, 0, 1, '', 4, 1),
+(62, 57, '/system/dictManage', 'dictManage', '/system/dictManage/index', '', 'Menu', '字典管理', '', 0, 0, 0, 1, '', 5, 1),
+(63, 57, '/system/timingTask', 'timingTask', '/system/timingTask/index', '', 'Menu', '定时任务', '', 0, 0, 0, 1, '', 6, 1),
+(64, 57, '/system/systemLog', 'systemLog', '/system/systemLog/index', '', 'Menu', '系统日志', '', 0, 0, 0, 1, '', 7, 1),
+(65, 0, '/link', 'link', '', '/link/bing', 'Paperclip', '外部链接', '', 0, 0, 0, 1, '', 12, 1),
+(66, 65, '/link/bing', 'bing', '/link/bing/index', '', 'Menu', 'Bing 内嵌', '', 0, 0, 0, 1, '', 1, 1),
+(67, 65, '/link/gitee', 'gitee', '/link/gitee/index', '', 'Menu', 'Gitee 仓库', 'https://gitee.com/HalseySpicy/Geeker-Admin', 0, 0, 0, 1, '', 2, 1),
+(68, 65, '/link/github', 'github', '/link/github/index', '', 'Menu', 'GitHub 仓库', 'https://github.com/HalseySpicy/Geeker-Admin', 0, 0, 0, 1, '', 3, 1),
+(69, 65, '/link/docs', 'docs', '/link/docs/index', '', 'Menu', '项目文档', 'https://docs.spicyboy.cn', 0, 0, 0, 1, '', 4, 1),
+(70, 65, '/link/juejin', 'juejin', '/link/juejin/index', '', 'Menu', '掘金主页', 'https://juejin.cn/user/3263814531551816/posts', 0, 0, 0, 1, '', 5, 1),
+(71, 0, '/about/index', 'about', '/about/index', '', 'InfoFilled', '关于项目', '', 0, 0, 0, 1, '', 13, 1);
+
+-- 重置自增ID
+ALTER TABLE sys_menu AUTO_INCREMENT = 72;

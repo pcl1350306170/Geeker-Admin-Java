@@ -1,0 +1,20 @@
+server:
+  port: 8880
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/geeker_admin?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+
+jwt:
+  secret: GeekerAdminSecretKeyForJWT2025Secure
+  expiration: 86400000
