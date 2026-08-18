@@ -45,6 +45,9 @@ public class DevAssetService {
     @Autowired
     private DevAssetUsageMapper usageMapper;
 
+    @Autowired
+    private DevAssetTagService tagService;
+
     /**
      * 分页查询 / 搜索（keyword 按空格拆分多关键词，权重排序）
      */
@@ -107,6 +110,8 @@ public class DevAssetService {
         asset.setUpdatedBy(asset.getCreatedBy());
         asset.setUpdatedAt(asset.getCreatedAt());
         assetMapper.insert(asset);
+        // 新标签自动注册到标签字典
+        tagService.registerTags(dto.getTags());
         return asset.getId();
     }
 
@@ -125,6 +130,8 @@ public class DevAssetService {
         asset.setUpdatedBy(getCurrentUsername());
         asset.setUpdatedAt(LocalDateTime.now());
         assetMapper.updateById(asset);
+        // 新标签自动注册到标签字典
+        tagService.registerTags(dto.getTags());
     }
 
     /**

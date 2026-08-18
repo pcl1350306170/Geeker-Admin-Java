@@ -61,6 +61,19 @@ CREATE TABLE dev_asset_relation (
     UNIQUE KEY uk_dar_pair (asset_id, relate_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '开发资产库-资产关联表';
 
+-- ----------------------------
+-- 标签字典表（只维护可选标签名，资产标签仍存 dev_asset.tags，搜索路径不变）
+-- ----------------------------
+DROP TABLE IF EXISTS dev_asset_tag;
+CREATE TABLE dev_asset_tag (
+    id         BIGINT      NOT NULL AUTO_INCREMENT COMMENT '标签ID',
+    name       VARCHAR(50) NOT NULL COMMENT '标签名',
+    sort       INT         NOT NULL DEFAULT 0 COMMENT '排序（越大越靠前）',
+    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_dat_name (name)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '开发资产库-标签字典表';
+
 -- ============================================
 -- 开发资产库菜单数据（接入现有动态菜单体系）
 -- sys_menu 现有数据 ID 到 71，AUTO_INCREMENT 已重置为 72
@@ -72,7 +85,8 @@ INSERT INTO sys_menu (id, parent_id, path, name, component, redirect, icon, titl
 (103, 100,  '/devAssets/favorite',     'devAssetsFavorite','/devAssets/favorite',       '',                 'Star',         '我的收藏',   '', 0, 0, 0, 1, '', 3, 1, 'admin,user'),
 (104, 100,  '/devAssets/detail/:id',   'devAssetsDetail',  '/devAssets/detail',         '',                 'Menu',         '资产详情',   '', 1, 0, 0, 1, '/devAssets/list', 4, 1, 'admin,user'),
 (105, 100,  '/devAssets/create',       'devAssetsCreate',  '/devAssets/edit',           '',                 'Menu',         '新增资产',   '', 1, 0, 0, 1, '/devAssets/list', 5, 1, 'admin,user'),
-(106, 100,  '/devAssets/edit/:id',     'devAssetsEdit',    '/devAssets/edit',           '',                 'Menu',         '编辑资产',   '', 1, 0, 0, 1, '/devAssets/list', 6, 1, 'admin,user');
+(106, 100,  '/devAssets/edit/:id',     'devAssetsEdit',    '/devAssets/edit',           '',                 'Menu',         '编辑资产',   '', 1, 0, 0, 1, '/devAssets/list', 6, 1, 'admin,user'),
+(107, 100,  '/devAssets/tags',         'devAssetsTags',    '/devAssets/tags',           '',                 'PriceTag',     '标签管理',   '', 0, 0, 0, 1, '', 7, 1, 'admin,user');
 
 -- ============================================
 -- 示例数据（可用于搜索验收，不需要可删除）
@@ -87,3 +101,11 @@ INSERT INTO dev_asset (title, type, description, content, language, tags, create
 ('ArkTS @Entry 组件只能有一个 root node', 'TROUBLESHOOTING', 'In an @Entry decorated component, the build method can have only one root node',
  '## 问题\n\n```\nIn an @Entry decorated component, the build method can have only one root node\n```\n\n## 原因\n\n@Entry 装饰的组件 build 方法只允许一个根节点。\n\n## 解决方案\n\n用单个容器（Column / Row / Stack）包裹所有子组件。\n\n## 注意事项\n\n非 @Entry 组件不受此限制。',
  '', '["ArkTS","HarmonyOS","踩坑"]', 'admin');
+
+-- 初始标签字典
+INSERT INTO dev_asset_tag (name, sort) VALUES
+('CSS', 0), ('小技巧', 0),
+('Vue3', 0), ('Sortable', 0), ('拖拽', 0),
+('ArkTS', 0), ('HarmonyOS', 0), ('踩坑', 0),
+('Vue2', 0), ('JavaScript', 0), ('TypeScript', 0), ('SCSS', 0),
+('Git', 0), ('Node', 0), ('Linux', 0), ('Docker', 0);
