@@ -3,6 +3,7 @@ package com.example.geekeradmin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.DevAssetQueryDTO;
+import com.example.geekeradmin.dto.DevAssetSaveDTO;
 import com.example.geekeradmin.service.DevAssetService;
 import com.example.geekeradmin.service.DevAssetTagService;
 import com.example.geekeradmin.vo.DevAssetDetailVO;
@@ -16,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 开发资产库公开接口（免登录，只读查询）
- * 供外部快速访问的独立单页使用，仅提供搜索 / 详情 / 复制上报能力
+ * 开发资产库公开接口（免登录）
+ * 供外部快速访问的独立单页使用，提供搜索 / 详情 / 新增 / 复制上报能力
  */
 @RestController
 @RequestMapping("/geeker/public/assets")
@@ -59,6 +60,15 @@ public class DevAssetPublicController {
     @GetMapping("/{id}")
     public Result<DevAssetDetailVO> detail(@PathVariable Long id) {
         return Result.success(devAssetService.getDetail(id));
+    }
+
+    /**
+     * 新增资产（公开）
+     */
+    @PostMapping
+    public Result<Map<String, Object>> add(@RequestBody DevAssetSaveDTO dto) {
+        Long id = devAssetService.addAsset(dto);
+        return Result.success(Map.of("id", id));
     }
 
     /**

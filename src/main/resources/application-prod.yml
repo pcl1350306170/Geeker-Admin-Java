@@ -4,3 +4,8 @@ spring:
     url: jdbc:mysql://127.0.0.1:3307/geeker_admin?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: dev_user
     password: 123456
+
+# 文件上传配置（WSL 中 D 盘挂载于 /mnt/d，指向同一个 image-cdn 仓库）
+app:
+  upload:
+    path: /mnt/d/CODE/image-cdn/Upload
