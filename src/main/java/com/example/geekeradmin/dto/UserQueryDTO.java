@@ -12,4 +12,6 @@ public class UserQueryDTO {
     private String username;
     private String nickname;
     private Integer status;
+    /** 按所属部门过滤 */
+    private Long deptId;
 }

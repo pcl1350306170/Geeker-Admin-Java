@@ -21,5 +21,9 @@ public class SysUser {
     /** 角色编码：admin-超级管理员 / user-普通用户（role 为 MySQL 保留字，需反引号） */
     @TableField("`role`")
     private String role;
+    /** 所属部门ID（关联 sys_department.id） */
+    private Long deptId;
+    /** 数据范围：1-全部数据 / 2-本部门 / 3-本部门及以下（admin 强制为全部） */
+    private Integer dataScope;
     private LocalDateTime createTime;
 }

@@ -14,4 +14,8 @@ public class UserSaveDTO {
     private String nickname;
     private String avatar;
     private Integer status;
+    /** 所属部门ID */
+    private Long deptId;
+    /** 数据范围：1-全部数据 / 2-本部门 / 3-本部门及以下 */
+    private Integer dataScope;
 }

@@ -102,13 +102,14 @@ public class UserController {
         // 写入 BOM 防止 Excel 打开中文乱码
         response.getOutputStream().write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
         PrintWriter writer = response.getWriter();
-        writer.println("ID,用户名,昵称,头像,状态,创建时间");
+        writer.println("ID,用户名,昵称,头像,所属部门,状态,创建时间");
         for (UserVO user : users) {
             writer.println(String.join(",",
                     String.valueOf(user.getId()),
                     escape(user.getUsername()),
                     escape(user.getNickname()),
                     escape(user.getAvatar()),
+                    escape(user.getDeptName()),
                     user.getStatus() != null && user.getStatus() == 1 ? "启用" : "禁用",
                     user.getCreateTime() == null ? "" : user.getCreateTime().toString()));
         }
