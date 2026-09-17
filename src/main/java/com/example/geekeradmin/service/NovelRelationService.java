@@ -203,6 +203,7 @@ public class NovelRelationService {
             node.setType(m.getRoleType());
             node.setIsHead(m.getIsHead());
             node.setSub(m.getTitle());
+            node.setGeneration(m.getGeneration());
             vo.getNodes().add(node);
         }
         for (NovelRelation r : innerRelations) {

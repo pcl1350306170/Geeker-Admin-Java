@@ -28,6 +28,8 @@ public class GraphVO {
         private Integer isHead;
         /** 附加信息（家族：成员数；成员：头衔） */
         private String sub;
+        /** 辈分（仅成员节点，如 G1/G2/G3/G4） */
+        private String generation;
     }
 
     @Data
