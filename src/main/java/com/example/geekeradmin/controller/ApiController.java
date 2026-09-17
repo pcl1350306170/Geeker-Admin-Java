@@ -73,6 +73,7 @@ public class ApiController {
             buttons.put("roleManage", List.of("menus"));
             buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
             buttons.put("departmentManage", Arrays.asList("add", "edit", "delete", "status"));
+            buttons.put("dictManage", Arrays.asList("add", "edit", "delete", "status", "refreshCache"));
         } else {
             // 普通用户：仅保留只读性质的按钮
             buttons.put("useProTable", List.of("export"));
