@@ -13,6 +13,10 @@ public class MemberDetailVO {
     private Long id;
     private Long familyId;
     private String familyName;
+    /** 所属小说ID */
+    private Long novelId;
+    /** 所属小说名称 */
+    private String novelName;
     private String name;
     private String alias;
     private String gender;

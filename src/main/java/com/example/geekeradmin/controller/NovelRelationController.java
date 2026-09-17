@@ -56,11 +56,11 @@ public class NovelRelationController {
     }
 
     /**
-     * 家族总览图：全部家族节点 + 家族间关系边
+     * 家族总览图：指定小说的家族节点 + 家族间关系边（novelId 为空时返回全部）
      */
     @GetMapping("/family-graph")
-    public Result<GraphVO> familyGraph() {
-        return Result.success(novelRelationService.getFamilyGraph());
+    public Result<GraphVO> familyGraph(@RequestParam(required = false) Long novelId) {
+        return Result.success(novelRelationService.getFamilyGraph(novelId));
     }
 
     /**

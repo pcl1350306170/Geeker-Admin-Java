@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
 @Data
 public class FamilyListVO {
     private Long id;
+    /** 所属小说ID */
+    private Long novelId;
+    /** 所属小说名称 */
+    private String novelName;
     private String name;
     private String alias;
     private String type;

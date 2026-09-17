@@ -7,6 +7,8 @@ import lombok.Data;
  */
 @Data
 public class FamilySaveDTO {
+    /** 所属小说ID（必填） */
+    private Long novelId;
     /** 家族名称（必填） */
     private String name;
     /** 别称/称号 */

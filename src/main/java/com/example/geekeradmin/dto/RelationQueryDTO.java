@@ -15,6 +15,8 @@ public class RelationQueryDTO {
     private Long memberId;
     /** 按家族过滤：返回与该家族相关的所有关系（任一端匹配） */
     private Long familyId;
+    /** 按小说过滤 */
+    private Long novelId;
     /** 关系状态 */
     private String status;
 }

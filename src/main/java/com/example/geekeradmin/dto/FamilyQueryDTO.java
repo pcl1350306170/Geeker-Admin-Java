@@ -15,4 +15,6 @@ public class FamilyQueryDTO {
     private String type;
     /** 势力地位 */
     private String status;
+    /** 所属小说ID */
+    private Long novelId;
 }

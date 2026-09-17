@@ -11,6 +11,8 @@ import java.util.List;
 public class MemberSaveDTO {
     /** 所属家族ID（必填） */
     private Long familyId;
+    /** 所属小说ID（可不传，后端以所属家族的小说为准） */
+    private Long novelId;
     /** 姓名（必填） */
     private String name;
     /** 字/号/别称 */

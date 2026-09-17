@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 public class NovelRelation {
     @TableId(type = IdType.AUTO)
     private Long id;
+    /** 所属小说ID */
+    private Long novelId;
     /** 发起端类型：MEMBER-成员 FAMILY-家族 */
     private String sourceType;
     /** 发起端ID */

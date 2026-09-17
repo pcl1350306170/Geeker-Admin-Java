@@ -13,6 +13,8 @@ public class MemberQueryDTO {
     private String keyword;
     /** 所属家族ID */
     private Long familyId;
+    /** 所属小说ID */
+    private Long novelId;
     /** 辈分 */
     private String generation;
     /** 角色定位 */

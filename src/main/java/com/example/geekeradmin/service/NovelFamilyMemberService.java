@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.geekeradmin.dto.MemberQueryDTO;
 import com.example.geekeradmin.dto.MemberSaveDTO;
+import com.example.geekeradmin.entity.Novel;
 import com.example.geekeradmin.entity.NovelFamily;
 import com.example.geekeradmin.entity.NovelFamilyMember;
 import com.example.geekeradmin.entity.NovelRelation;
 import com.example.geekeradmin.mapper.NovelFamilyMapper;
 import com.example.geekeradmin.mapper.NovelFamilyMemberMapper;
+import com.example.geekeradmin.mapper.NovelMapper;
 import com.example.geekeradmin.mapper.NovelRelationMapper;
 import com.example.geekeradmin.vo.MemberDetailVO;
 import com.example.geekeradmin.vo.MemberListVO;
@@ -44,6 +46,9 @@ public class NovelFamilyMemberService {
     @Autowired
     private NovelRelationMapper relationMapper;
 
+    @Autowired
+    private NovelMapper novelMapper;
+
     /**
      * 分页查询成员（含所属家族名）
      */
@@ -58,6 +63,9 @@ public class NovelFamilyMemberService {
         }
         if (query.getFamilyId() != null) {
             wrapper.eq(NovelFamilyMember::getFamilyId, query.getFamilyId());
+        }
+        if (query.getNovelId() != null) {
+            wrapper.eq(NovelFamilyMember::getNovelId, query.getNovelId());
         }
         if (StringUtils.hasText(query.getGeneration())) {
             wrapper.eq(NovelFamilyMember::getGeneration, query.getGeneration());
@@ -79,6 +87,7 @@ public class NovelFamilyMemberService {
                 : familyMapper.selectBatchIds(familyIds).stream()
                         .filter(f -> f.getDeleted() == null || f.getDeleted() == 0)
                         .collect(Collectors.toMap(NovelFamily::getId, NovelFamily::getName));
+        Map<Long, String> novelNameMap = getNovelNameMap(page.getRecords());
 
         IPage<MemberListVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
         voPage.setRecords(page.getRecords().stream().map(m -> {
@@ -86,6 +95,8 @@ public class NovelFamilyMemberService {
             vo.setId(m.getId());
             vo.setFamilyId(m.getFamilyId());
             vo.setFamilyName(familyNameMap.get(m.getFamilyId()));
+            vo.setNovelId(m.getNovelId());
+            vo.setNovelName(novelNameMap.get(m.getNovelId()));
             vo.setName(m.getName());
             vo.setAlias(m.getAlias());
             vo.setGender(m.getGender());
@@ -111,6 +122,8 @@ public class NovelFamilyMemberService {
         vo.setId(member.getId());
         vo.setFamilyId(member.getFamilyId());
         vo.setFamilyName(getFamilyName(member.getFamilyId()));
+        vo.setNovelId(member.getNovelId());
+        vo.setNovelName(getNovelName(member.getNovelId()));
         vo.setName(member.getName());
         vo.setAlias(member.getAlias());
         vo.setGender(member.getGender());
@@ -205,6 +218,9 @@ public class NovelFamilyMemberService {
 
     private void applySaveDTO(NovelFamilyMember member, MemberSaveDTO dto) {
         member.setFamilyId(dto.getFamilyId());
+        // 所属小说以所属家族为准
+        NovelFamily family = familyMapper.selectById(dto.getFamilyId());
+        member.setNovelId(family.getNovelId());
         member.setName(dto.getName().trim());
         member.setAlias(dto.getAlias());
         member.setGender(dto.getGender());
@@ -223,6 +239,30 @@ public class NovelFamilyMemberService {
     private String getFamilyName(Long familyId) {
         NovelFamily family = familyMapper.selectById(familyId);
         return family == null ? null : family.getName();
+    }
+
+    /**
+     * 批量查询小说名称
+     */
+    private Map<Long, String> getNovelNameMap(List<NovelFamilyMember> members) {
+        List<Long> novelIds = members.stream()
+                .map(NovelFamilyMember::getNovelId)
+                .filter(java.util.Objects::nonNull)
+                .distinct().toList();
+        if (novelIds.isEmpty()) {
+            return Map.of();
+        }
+        return novelMapper.selectBatchIds(novelIds).stream()
+                .filter(n -> n.getDeleted() == null || n.getDeleted() == 0)
+                .collect(Collectors.toMap(Novel::getId, Novel::getName, (a, b) -> a));
+    }
+
+    private String getNovelName(Long novelId) {
+        if (novelId == null) {
+            return null;
+        }
+        Novel novel = novelMapper.selectById(novelId);
+        return novel == null || (novel.getDeleted() != null && novel.getDeleted() == 1) ? null : novel.getName();
     }
 
     private List<String> parsePersonality(String personality) {

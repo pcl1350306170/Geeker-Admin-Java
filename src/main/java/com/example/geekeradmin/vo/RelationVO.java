@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 @Data
 public class RelationVO {
     private Long id;
+    /** 所属小说ID */
+    private Long novelId;
     private String sourceType;
     private Long sourceId;
     /** 发起端显示名（成员姓名 / 家族名） */

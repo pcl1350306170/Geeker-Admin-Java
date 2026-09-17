@@ -17,6 +17,8 @@ public class RelationSaveDTO {
     private Long targetId;
     /** 关系类型（字典 novel_relation_type，必填） */
     private String relationType;
+    /** 所属小说ID（可不传，后端以发起端所属小说为准） */
+    private Long novelId;
     /** 补充描述 */
     private String description;
     /** 关系状态：ACTIVE-存续 BROKEN-破裂，默认 ACTIVE */

@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.geekeradmin.dto.FamilyQueryDTO;
 import com.example.geekeradmin.dto.FamilySaveDTO;
+import com.example.geekeradmin.entity.Novel;
 import com.example.geekeradmin.entity.NovelFamily;
 import com.example.geekeradmin.entity.NovelFamilyMember;
 import com.example.geekeradmin.entity.NovelRelation;
 import com.example.geekeradmin.mapper.NovelFamilyMapper;
 import com.example.geekeradmin.mapper.NovelFamilyMemberMapper;
+import com.example.geekeradmin.mapper.NovelMapper;
 import com.example.geekeradmin.mapper.NovelRelationMapper;
 import com.example.geekeradmin.vo.FamilyDetailVO;
 import com.example.geekeradmin.vo.FamilyListVO;
@@ -40,6 +42,9 @@ public class NovelFamilyService {
     @Autowired
     private NovelRelationMapper relationMapper;
 
+    @Autowired
+    private NovelMapper novelMapper;
+
     /**
      * 分页查询家族（含成员数 / 核心角色数统计）
      */
@@ -58,6 +63,9 @@ public class NovelFamilyService {
         if (StringUtils.hasText(query.getStatus())) {
             wrapper.eq(NovelFamily::getStatus, query.getStatus());
         }
+        if (query.getNovelId() != null) {
+            wrapper.eq(NovelFamily::getNovelId, query.getNovelId());
+        }
         wrapper.orderByAsc(NovelFamily::getSort).orderByDesc(NovelFamily::getUpdatedAt);
 
         IPage<NovelFamily> page = familyMapper.selectPage(
@@ -66,11 +74,14 @@ public class NovelFamilyService {
         List<Long> ids = page.getRecords().stream().map(NovelFamily::getId).toList();
         Map<Long, Integer> memberCountMap = ids.isEmpty() ? Collections.emptyMap() : countMembers(ids, false);
         Map<Long, Integer> coreCountMap = ids.isEmpty() ? Collections.emptyMap() : countMembers(ids, true);
+        Map<Long, String> novelNameMap = getNovelNameMap(page.getRecords());
 
         IPage<FamilyListVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
         voPage.setRecords(page.getRecords().stream().map(f -> {
             FamilyListVO vo = new FamilyListVO();
             vo.setId(f.getId());
+            vo.setNovelId(f.getNovelId());
+            vo.setNovelName(novelNameMap.get(f.getNovelId()));
             vo.setName(f.getName());
             vo.setAlias(f.getAlias());
             vo.setType(f.getType());
@@ -93,6 +104,8 @@ public class NovelFamilyService {
         NovelFamily family = getExistFamily(id);
         FamilyDetailVO vo = new FamilyDetailVO();
         vo.setId(family.getId());
+        vo.setNovelId(family.getNovelId());
+        vo.setNovelName(getNovelName(family.getNovelId()));
         vo.setName(family.getName());
         vo.setAlias(family.getAlias());
         vo.setType(family.getType());
@@ -181,9 +194,17 @@ public class NovelFamilyService {
         if (!StringUtils.hasText(dto.getName())) {
             throw new RuntimeException("家族名称不能为空");
         }
+        if (dto.getNovelId() == null) {
+            throw new RuntimeException("所属小说不能为空");
+        }
+        Novel novel = novelMapper.selectById(dto.getNovelId());
+        if (novel == null || (novel.getDeleted() != null && novel.getDeleted() == 1)) {
+            throw new RuntimeException("所属小说不存在或已被删除");
+        }
     }
 
     private void applySaveDTO(NovelFamily family, FamilySaveDTO dto) {
+        family.setNovelId(dto.getNovelId());
         family.setName(dto.getName().trim());
         family.setAlias(dto.getAlias());
         family.setType(dto.getType());
@@ -210,6 +231,30 @@ public class NovelFamilyService {
         }
         return memberMapper.selectList(wrapper).stream()
                 .collect(Collectors.groupingBy(NovelFamilyMember::getFamilyId, Collectors.summingInt(m -> 1)));
+    }
+
+    /**
+     * 批量查询小说名称（用于列表 VO 组装）
+     */
+    private Map<Long, String> getNovelNameMap(List<NovelFamily> families) {
+        List<Long> novelIds = families.stream()
+                .map(NovelFamily::getNovelId)
+                .filter(java.util.Objects::nonNull)
+                .distinct().toList();
+        if (novelIds.isEmpty()) {
+            return Map.of();
+        }
+        return novelMapper.selectBatchIds(novelIds).stream()
+                .filter(n -> n.getDeleted() == null || n.getDeleted() == 0)
+                .collect(Collectors.toMap(Novel::getId, Novel::getName, (a, b) -> a));
+    }
+
+    private String getNovelName(Long novelId) {
+        if (novelId == null) {
+            return null;
+        }
+        Novel novel = novelMapper.selectById(novelId);
+        return novel == null || (novel.getDeleted() != null && novel.getDeleted() == 1) ? null : novel.getName();
     }
 
     private String getHeadName(Long familyId) {

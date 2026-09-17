@@ -70,6 +70,9 @@ public class NovelRelationService {
                     .and(w -> w.eq(NovelRelation::getSourceId, query.getFamilyId())
                             .or().eq(NovelRelation::getTargetId, query.getFamilyId()));
         }
+        if (query.getNovelId() != null) {
+            wrapper.eq(NovelRelation::getNovelId, query.getNovelId());
+        }
         wrapper.orderByDesc(NovelRelation::getCreatedAt);
 
         IPage<NovelRelation> page = relationMapper.selectPage(
@@ -90,6 +93,7 @@ public class NovelRelationService {
         relation.setSourceId(dto.getSourceId());
         relation.setTargetType(dto.getTargetType());
         relation.setTargetId(dto.getTargetId());
+        relation.setNovelId(resolveNovelId(dto));
         relation.setRelationType(dto.getRelationType());
         relation.setDescription(dto.getDescription());
         relation.setStatus(StringUtils.hasText(dto.getStatus()) ? dto.getStatus() : STATUS_ACTIVE);
@@ -116,16 +120,24 @@ public class NovelRelationService {
     }
 
     /**
-     * 家族总览图：全部家族节点 + 家族间关系边
+     * 家族总览图：指定小说的全部家族节点 + 家族间关系边（novelId 为空时返回全部）
      */
-    public GraphVO getFamilyGraph() {
-        List<NovelFamily> families = familyMapper.selectList(new LambdaQueryWrapper<NovelFamily>()
-                .eq(NovelFamily::getDeleted, 0)
-                .orderByAsc(NovelFamily::getSort).orderByDesc(NovelFamily::getUpdatedAt));
+    public GraphVO getFamilyGraph(Long novelId) {
+        LambdaQueryWrapper<NovelFamily> familyWrapper = new LambdaQueryWrapper<>();
+        familyWrapper.eq(NovelFamily::getDeleted, 0);
+        if (novelId != null) {
+            familyWrapper.eq(NovelFamily::getNovelId, novelId);
+        }
+        familyWrapper.orderByAsc(NovelFamily::getSort).orderByDesc(NovelFamily::getUpdatedAt);
+        List<NovelFamily> families = familyMapper.selectList(familyWrapper);
 
-        List<NovelRelation> relations = relationMapper.selectList(new LambdaQueryWrapper<NovelRelation>()
-                .eq(NovelRelation::getDeleted, 0)
-                .eq(NovelRelation::getSourceType, TYPE_FAMILY));
+        LambdaQueryWrapper<NovelRelation> relationWrapper = new LambdaQueryWrapper<>();
+        relationWrapper.eq(NovelRelation::getDeleted, 0)
+                .eq(NovelRelation::getSourceType, TYPE_FAMILY);
+        if (novelId != null) {
+            relationWrapper.eq(NovelRelation::getNovelId, novelId);
+        }
+        List<NovelRelation> relations = relationMapper.selectList(relationWrapper);
 
         GraphVO vo = new GraphVO();
         vo.setNodes(new ArrayList<>());
@@ -227,12 +239,18 @@ public class NovelRelationService {
                     || target == null || (target.getDeleted() != null && target.getDeleted() == 1)) {
                 throw new RuntimeException("关系两端成员不存在或已被删除");
             }
+            if (!java.util.Objects.equals(source.getNovelId(), target.getNovelId())) {
+                throw new RuntimeException("关系两端成员必须属于同一部小说");
+            }
         } else {
             NovelFamily source = familyMapper.selectById(dto.getSourceId());
             NovelFamily target = familyMapper.selectById(dto.getTargetId());
             if (source == null || (source.getDeleted() != null && source.getDeleted() == 1)
                     || target == null || (target.getDeleted() != null && target.getDeleted() == 1)) {
                 throw new RuntimeException("关系两端家族不存在或已被删除");
+            }
+            if (!java.util.Objects.equals(source.getNovelId(), target.getNovelId())) {
+                throw new RuntimeException("关系两端家族必须属于同一部小说");
             }
         }
         // 重复校验：同方向与反方向均视为重复
@@ -259,6 +277,18 @@ public class NovelRelationService {
             throw new RuntimeException("关系不存在或已被删除");
         }
         return relation;
+    }
+
+    /**
+     * 关系所属小说：以发起端实体为准（前端可传 novelId，但以服务端口径为准）
+     */
+    private Long resolveNovelId(RelationSaveDTO dto) {
+        if (TYPE_MEMBER.equals(dto.getSourceType())) {
+            NovelFamilyMember source = memberMapper.selectById(dto.getSourceId());
+            return source == null ? null : source.getNovelId();
+        }
+        NovelFamily source = familyMapper.selectById(dto.getSourceId());
+        return source == null ? null : source.getNovelId();
     }
 
     /**
@@ -289,6 +319,7 @@ public class NovelRelationService {
         for (NovelRelation r : relations) {
             RelationVO vo = new RelationVO();
             vo.setId(r.getId());
+            vo.setNovelId(r.getNovelId());
             vo.setSourceType(r.getSourceType());
             vo.setSourceId(r.getSourceId());
             vo.setTargetType(r.getTargetType());

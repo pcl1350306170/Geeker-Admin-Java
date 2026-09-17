@@ -17,6 +17,8 @@ public class NovelFamilyMember {
     private Long id;
     /** 所属家族ID */
     private Long familyId;
+    /** 所属小说ID */
+    private Long novelId;
     /** 姓名 */
     private String name;
     /** 字/号/别称 */
