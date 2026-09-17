@@ -8,6 +8,7 @@ import com.example.geekeradmin.service.DevAssetService;
 import com.example.geekeradmin.vo.DevAssetDetailVO;
 import com.example.geekeradmin.vo.DevAssetHomeVO;
 import com.example.geekeradmin.vo.DevAssetListVO;
+import com.example.geekeradmin.vo.DevAssetPreviewVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +39,20 @@ public class DevAssetController {
     @GetMapping
     public Result<Map<String, Object>> list(DevAssetQueryDTO query) {
         IPage<DevAssetListVO> page = devAssetService.getAssetPage(query);
+        Map<String, Object> data = new HashMap<>();
+        data.put("list", page.getRecords());
+        data.put("total", page.getTotal());
+        data.put("pageNum", page.getCurrent());
+        data.put("pageSize", page.getSize());
+        return Result.success(data);
+    }
+
+    /**
+     * 订单预览：按标签（默认「门诊特殊订单」）分页查询，返回带正文首图缩略图的列表
+     */
+    @GetMapping("/order-preview")
+    public Result<Map<String, Object>> orderPreview(DevAssetQueryDTO query) {
+        IPage<DevAssetPreviewVO> page = devAssetService.getOrderPreviewPage(query);
         Map<String, Object> data = new HashMap<>();
         data.put("list", page.getRecords());
         data.put("total", page.getTotal());

@@ -13,6 +13,7 @@ import com.example.geekeradmin.mapper.DevAssetUsageMapper;
 import com.example.geekeradmin.vo.DevAssetDetailVO;
 import com.example.geekeradmin.vo.DevAssetHomeVO;
 import com.example.geekeradmin.vo.DevAssetListVO;
+import com.example.geekeradmin.vo.DevAssetPreviewVO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +39,16 @@ public class DevAssetService {
     /** 合法的资产类型 */
     private static final Set<String> ASSET_TYPES = Set.of(
             "CODE", "SOLUTION", "TROUBLESHOOTING", "PROCEDURE", "SNIPPET");
+
+    /** 「订单预览」默认筛选标签 */
+    private static final String ORDER_PREVIEW_TAG = "门诊特殊订单";
+
+    /** Markdown 图片：![alt](url) */
+    private static final Pattern MD_IMAGE_PATTERN = Pattern.compile("!\\[[^\\]]*]\\(\\s*<?([^)\\s>]+)");
+
+    /** HTML 图片：<img src="url"> */
+    private static final Pattern HTML_IMAGE_PATTERN =
+            Pattern.compile("<img[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']", Pattern.CASE_INSENSITIVE);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -58,6 +71,22 @@ public class DevAssetService {
                 keywords, query.getType(), query.getTag(), query.getIsFavorite());
         IPage<DevAssetListVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
         voPage.setRecords(page.getRecords().stream().map(this::toListVO).collect(Collectors.toList()));
+        return voPage;
+    }
+
+    /**
+     * 订单预览：按标签（默认「门诊特殊订单」）分页查询资产，并提取正文首图作为缩略图
+     */
+    public IPage<DevAssetPreviewVO> getOrderPreviewPage(DevAssetQueryDTO query) {
+        String tag = StringUtils.hasText(query.getTag()) ? query.getTag().trim() : ORDER_PREVIEW_TAG;
+        LambdaQueryWrapper<DevAsset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DevAsset::getDeleted, 0)
+                .like(DevAsset::getTags, tag)
+                .orderByDesc(DevAsset::getUpdatedAt);
+        IPage<DevAsset> page = assetMapper.selectPage(
+                new Page<>(query.getPageNum(), query.getPageSize()), wrapper);
+        IPage<DevAssetPreviewVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        voPage.setRecords(page.getRecords().stream().map(this::toPreviewVO).collect(Collectors.toList()));
         return voPage;
     }
 
@@ -276,6 +305,38 @@ public class DevAssetService {
         vo.setParentId(asset.getParentId());
         vo.setUpdatedAt(asset.getUpdatedAt());
         return vo;
+    }
+
+    private DevAssetPreviewVO toPreviewVO(DevAsset asset) {
+        DevAssetPreviewVO vo = new DevAssetPreviewVO();
+        vo.setId(asset.getId());
+        vo.setTitle(asset.getTitle());
+        vo.setDescription(asset.getDescription());
+        vo.setType(asset.getType());
+        vo.setTags(parseTags(asset.getTags()));
+        vo.setCoverImage(extractFirstImage(asset.getContent()));
+        vo.setIsFavorite(asset.getIsFavorite());
+        vo.setUsageCount(asset.getUsageCount());
+        vo.setUpdatedAt(asset.getUpdatedAt());
+        return vo;
+    }
+
+    /**
+     * 提取正文中第一张图片地址：优先 Markdown 图片，其次 HTML <img>
+     */
+    private String extractFirstImage(String content) {
+        if (!StringUtils.hasText(content)) {
+            return null;
+        }
+        Matcher md = MD_IMAGE_PATTERN.matcher(content);
+        if (md.find()) {
+            return md.group(1).trim();
+        }
+        Matcher html = HTML_IMAGE_PATTERN.matcher(content);
+        if (html.find()) {
+            return html.group(1).trim();
+        }
+        return null;
     }
 
     private List<String> parseTags(String tags) {

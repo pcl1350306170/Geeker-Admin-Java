@@ -86,7 +86,8 @@ INSERT INTO sys_menu (id, parent_id, path, name, component, redirect, icon, titl
 (104, 100,  '/devAssets/detail/:id',   'devAssetsDetail',  '/devAssets/detail',         '',                 'Menu',         '资产详情',   '', 1, 0, 0, 1, '/devAssets/list', 4, 1, 'admin,user'),
 (105, 100,  '/devAssets/create',       'devAssetsCreate',  '/devAssets/edit',           '',                 'Menu',         '新增资产',   '', 1, 0, 0, 1, '/devAssets/list', 5, 1, 'admin,user'),
 (106, 100,  '/devAssets/edit/:id',     'devAssetsEdit',    '/devAssets/edit',           '',                 'Menu',         '编辑资产',   '', 1, 0, 0, 1, '/devAssets/list', 6, 1, 'admin,user'),
-(107, 100,  '/devAssets/tags',         'devAssetsTags',    '/devAssets/tags',           '',                 'PriceTag',     '标签管理',   '', 0, 0, 0, 1, '', 7, 1, 'admin,user');
+(107, 100,  '/devAssets/tags',         'devAssetsTags',    '/devAssets/tags',           '',                 'PriceTag',     '标签管理',   '', 0, 0, 0, 1, '', 7, 1, 'admin,user'),
+(108, 100,  '/devAssets/orderPreview', 'devAssetsOrderPreview', '/devAssets/orderPreview', '',              'Picture',      '订单预览',   '', 0, 0, 0, 1, '', 8, 1, 'admin,user');
 
 -- ============================================
 -- 示例数据（可用于搜索验收，不需要可删除）
