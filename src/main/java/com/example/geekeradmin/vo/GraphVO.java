@@ -42,5 +42,7 @@ public class GraphVO {
         private String relationType;
         /** 补充描述 */
         private String description;
+        /** 关系记录ID（前端编辑/删除用） */
+        private Long relationId;
     }
 }

@@ -362,6 +362,7 @@ public class NovelRelationService {
         edge.setTarget(prefix + r.getTargetId());
         edge.setRelationType(r.getRelationType());
         edge.setDescription(r.getDescription());
+        edge.setRelationId(r.getId());
         return edge;
     }
 
