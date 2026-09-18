@@ -1,6 +1,8 @@
 package com.example.geekeradmin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.DictDataQueryDTO;
 import com.example.geekeradmin.dto.DictDataSaveDTO;
@@ -52,6 +54,7 @@ public class DictController {
     /**
      * 新增字典类型
      */
+    @Log(title = "字典类型", businessType = BusinessType.INSERT)
     @PostMapping("/type")
     public Result<?> addType(@RequestBody DictTypeSaveDTO dto) {
         dictService.addDictType(dto);
@@ -61,6 +64,7 @@ public class DictController {
     /**
      * 编辑字典类型
      */
+    @Log(title = "字典类型", businessType = BusinessType.UPDATE)
     @PutMapping("/type")
     public Result<?> updateType(@RequestBody DictTypeSaveDTO dto) {
         dictService.updateDictType(dto);
@@ -70,6 +74,7 @@ public class DictController {
     /**
      * 删除字典类型
      */
+    @Log(title = "字典类型", businessType = BusinessType.DELETE)
     @DeleteMapping("/type/{id}")
     public Result<?> deleteType(@PathVariable Long id) {
         dictService.deleteDictType(id);
@@ -79,6 +84,7 @@ public class DictController {
     /**
      * 切换字典类型状态
      */
+    @Log(title = "字典类型", businessType = BusinessType.UPDATE)
     @PutMapping("/type/status")
     public Result<?> changeTypeStatus(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
@@ -90,6 +96,7 @@ public class DictController {
     /**
      * 导出字典类型列表（CSV 格式，前端 http.download 为 POST 请求）
      */
+    @Log(title = "字典类型", businessType = BusinessType.EXPORT)
     @PostMapping("/type/export")
     public void exportType(HttpServletResponse response) throws Exception {
         List<SysDictType> types = dictService.getAllDictTypes();
@@ -135,6 +142,7 @@ public class DictController {
     /**
      * 新增字典数据
      */
+    @Log(title = "字典数据", businessType = BusinessType.INSERT)
     @PostMapping("/data")
     public Result<?> addData(@RequestBody DictDataSaveDTO dto) {
         dictService.addDictData(dto);
@@ -144,6 +152,7 @@ public class DictController {
     /**
      * 编辑字典数据
      */
+    @Log(title = "字典数据", businessType = BusinessType.UPDATE)
     @PutMapping("/data")
     public Result<?> updateData(@RequestBody DictDataSaveDTO dto) {
         dictService.updateDictData(dto);
@@ -153,6 +162,7 @@ public class DictController {
     /**
      * 删除字典数据
      */
+    @Log(title = "字典数据", businessType = BusinessType.DELETE)
     @DeleteMapping("/data/{id}")
     public Result<?> deleteData(@PathVariable Long id) {
         dictService.deleteDictData(id);
@@ -162,6 +172,7 @@ public class DictController {
     /**
      * 切换字典数据状态
      */
+    @Log(title = "字典数据", businessType = BusinessType.UPDATE)
     @PutMapping("/data/status")
     public Result<?> changeDataStatus(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
@@ -173,6 +184,7 @@ public class DictController {
     /**
      * 导出字典数据列表（CSV 格式，前端 http.download 为 POST 请求）
      */
+    @Log(title = "字典数据", businessType = BusinessType.EXPORT)
     @PostMapping("/data/export")
     public void exportData(HttpServletResponse response) throws Exception {
         List<SysDictData> dataList = dictService.getAllDictData();
@@ -206,6 +218,7 @@ public class DictController {
     /**
      * 手动刷新全部字典缓存
      */
+    @Log(title = "字典缓存", businessType = BusinessType.OTHER)
     @PostMapping("/cache/refresh")
     public Result<?> refreshCache() {
         dictService.refreshAllCache();

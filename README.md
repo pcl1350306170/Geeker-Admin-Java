@@ -2,7 +2,7 @@
 
 [Geeker-Admin](https://github.com/HalseySpicy/Geeker-Admin)（Vue3 + TypeScript + Element-Plus）配套的 **Spring Boot 3** 后端服务。
 
-> 一份"开箱即跑"的中后台脚手架：JWT 鉴权、动态菜单、按钮级权限、部门/字典/账号管理、开发资产库、小说家族图谱等业务模块一应俱全。
+> 一份"开箱即跑"的中后台脚手架：JWT 鉴权、动态菜单、按钮级权限、部门/字典/账号管理、系统日志、开发资产库、小说家族图谱等业务模块一应俱全。
 
 ---
 
@@ -33,13 +33,14 @@
 | 文件上传 | `FileController` | 本地目录写入 + jsDelivr CDN 回显（图床走 `image-cdn` 仓库） |
 | 开发资产库 | `DevAssetController` / `DevAssetTagController` / `DevAssetPublicController` | 代码/方案/踩坑/流程/片段五类资产，标签管理、收藏、复制计数、公开搜索页 |
 | 小说家族 | `NovelController` / `NovelFamilyController` / `NovelFamilyMemberController` / `NovelRelationController` | 小说→家族→成员→关系四级建模，支持关系图谱可视化 |
+| 系统日志 | `LogController` | `@Log` 注解 + AOP 切面自动采集操作/登录/异常三类日志，支持分页查询、详情、删除、按类型清空、CSV 导出 |
 
-代码统计：**14 个 Controller / 11 个 Service / 13 个 Entity / 12 个 Mapper / 20 个 DTO / 14 个 VO**，共 **94** 个 Java 文件。
+代码统计：**15 个 Controller / 12 个 Service / 14 个 Entity / 13 个 Mapper / 22 个 DTO / 14 个 VO**，共 **104** 个 Java 文件。
 
-### 数据库表（13 张）
+### 数据库表（14 张）
 
 ```
-sys_user            sys_menu            sys_department
+sys_user            sys_menu            sys_department      sys_log
 sys_dict_type       sys_dict_data
 dev_asset           dev_asset_tag       dev_asset_usage     dev_asset_relation
 novel               novel_family        novel_family_member novel_relation
@@ -60,7 +61,7 @@ novel               novel_family        novel_family_member novel_relation
 
 **整个项目只需要执行一个 SQL 文件**：[`src/main/resources/geeker_admin_full.sql`](src/main/resources/geeker_admin_full.sql)
 
-它包含：建库 → 建 13 张表 → 灌入全部种子数据（菜单、字典、部门、账号、演示用小说家族）。**幂等**，可重复执行。
+它包含：建库 → 建 14 张表 → 灌入全部种子数据（菜单、字典、部门、账号、演示用小说家族）。**幂等**，可重复执行。
 
 任选一种方式执行：
 
@@ -169,6 +170,7 @@ VITE_API_URL = http://localhost:8880
 | 文件 | `/geeker/file/upload` | 图片/附件上传，返回 CDN URL |
 | 开发资产库 | `/geeker/devAsset`、`/geeker/devAssetTag` | 资产 CRUD、收藏、标签管理 |
 | 小说家族 | `/geeker/novel`、`/geeker/novelFamily`、`/geeker/novelFamilyMember`、`/geeker/novelRelation` | 四级建模、关系图谱 |
+| 系统日志 | `/geeker/log` | 分页查询、详情、删除、按类型清空、CSV 导出 |
 
 未登录访问鉴权接口时统一返回：
 
@@ -186,15 +188,16 @@ Geeker-Admin-Java/
 ├── mvnw / mvnw.cmd                     Maven 包装器
 ├── src/main/java/com/example/geekeradmin/
 │   ├── GeekerAdminApplication.java     启动类
-│   ├── common/                         Result / GlobalExceptionHandler
-│   ├── config/                         SecurityConfig / MybatisPlusConfig / WebMvcConfig
+│   ├── common/                         Result / GlobalExceptionHandler / @Log 注解 / BusinessType 枚举
+│   ├── config/                         SecurityConfig / MybatisPlusConfig / WebMvcConfig / AsyncConfig（日志异步线程池）
+│   ├── aspect/                         LogAspect（@Log 操作日志切面）
 │   ├── filter/                         JwtAuthenticationFilter
-│   ├── util/                           JwtUtil / PasswordEncoderUtil
-│   ├── controller/                     14 个 REST 控制器
-│   ├── service/                        11 个业务服务
-│   ├── mapper/                         12 个 MyBatis-Plus Mapper
-│   ├── entity/                         13 个数据库实体
-│   ├── dto/                            20 个入参对象
+│   ├── util/                           JwtUtil / PasswordEncoderUtil / IpUtil
+│   ├── controller/                     15 个 REST 控制器
+│   ├── service/                        12 个业务服务
+│   ├── mapper/                         13 个 MyBatis-Plus Mapper
+│   ├── entity/                         14 个数据库实体
+│   ├── dto/                            22 个入参对象
 │   └── vo/                             14 个出参对象
 ├── src/main/resources/
 │   ├── application.yml                 开发配置（端口 8880）
@@ -243,6 +246,14 @@ Geeker-Admin-Java/
 - 唯一键 `uk_relation` 防止重复建边；
 - 内置《红楼梦》四大家族 + 《仙剑三同人》唐家两套演示数据（共 3 部小说 / 6 个家族 / 46 名成员 / 88 条关系）。
 
+### 6. 系统日志（AOP 自动采集）
+
+- **采集方式**：自定义 `@Log` 注解 + `LogAspect` 环绕切面（`@Around("@annotation(Log)")`），在业务 Controller 方法上标注即可自动记录，不侵入业务代码；
+- **三类日志**：统一落 `sys_log` 表，用 `log_type` 区分——`1` 操作日志（增删改 / 导出）、`2` 登录日志（登录 / 登出）、`3` 异常日志（`GlobalExceptionHandler` 兜底写入）；
+- **异步落库**：`LogService#saveLog` 标注 `@Async("logTaskExecutor")`，由 `AsyncConfig` 提供的独立线程池写库，不阻塞主请求；日志采集失败仅打印错误，绝不影响业务；
+- **操作人 & IP**：优先从 `SecurityContext` 取当前用户（登录接口无认证时回退取入参 username），IP 经 `IpUtil` 解析 `X-Forwarded-For` 等代理头，适配 nginx 反代；
+- **前端**：`/system/systemLog` 单页 ProTable，按 `log_type` 字典（`sys_log_type`）筛选，支持详情弹窗、删除、按类型清空、CSV 导出（带 BOM 防中文乱码）。
+
 ---
 
 ## 六、部署
@@ -264,7 +275,7 @@ java -jar target/geekeradmin-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 
 ### 数据库迁移
 
-老库升级到最新 schema：直接跑 `geeker_admin_full.sql` 即可（会 DROP 后重建）。**注意备份业务数据**（`dev_asset` / `dev_asset_usage` 不在种子范围内，会被清空）。
+老库升级到最新 schema：直接跑 `geeker_admin_full.sql` 即可（会 DROP 后重建）。**注意备份业务数据**（`dev_asset` / `dev_asset_usage` / `sys_log` 不在种子范围内，会被清空）。
 
 ---
 
@@ -272,6 +283,7 @@ java -jar target/geekeradmin-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 
 按提交顺序（最新在上）：
 
+- `feat(system)` 系统日志模块（`@Log` 注解 + AOP 切面，操作/登录/异常三类日志）
 - `feat(graph)` 成员关系图添加辈分布局和人物详情面板
 - `feat(system)` 字典管理 + 小说家族功能
 - `feat(devAssets)` 订单预览功能

@@ -1,6 +1,8 @@
 package com.example.geekeradmin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.DevAssetQueryDTO;
 import com.example.geekeradmin.dto.DevAssetSaveDTO;
@@ -72,6 +74,7 @@ public class DevAssetController {
     /**
      * 新增资产
      */
+    @Log(title = "开发资产", businessType = BusinessType.INSERT)
     @PostMapping
     public Result<Map<String, Object>> add(@RequestBody DevAssetSaveDTO dto) {
         Long id = devAssetService.addAsset(dto);
@@ -81,6 +84,7 @@ public class DevAssetController {
     /**
      * 编辑资产
      */
+    @Log(title = "开发资产", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}")
     public Result<?> update(@PathVariable Long id, @RequestBody DevAssetSaveDTO dto) {
         devAssetService.updateAsset(id, dto);
@@ -90,6 +94,7 @@ public class DevAssetController {
     /**
      * 删除资产（逻辑删除）
      */
+    @Log(title = "开发资产", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable Long id) {
         devAssetService.deleteAsset(id);
@@ -99,6 +104,7 @@ public class DevAssetController {
     /**
      * 收藏 / 取消收藏
      */
+    @Log(title = "开发资产", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/favorite")
     public Result<Map<String, Object>> favorite(@PathVariable Long id) {
         Integer isFavorite = devAssetService.toggleFavorite(id);
@@ -117,6 +123,7 @@ public class DevAssetController {
     /**
      * 基于旧资产创建新资产
      */
+    @Log(title = "开发资产", businessType = BusinessType.INSERT)
     @PostMapping("/{id}/duplicate")
     public Result<Map<String, Object>> duplicate(@PathVariable Long id) {
         Long newId = devAssetService.duplicateAsset(id);

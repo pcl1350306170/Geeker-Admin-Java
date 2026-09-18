@@ -1,6 +1,8 @@
 package com.example.geekeradmin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.UserQueryDTO;
 import com.example.geekeradmin.dto.UserSaveDTO;
@@ -44,6 +46,7 @@ public class UserController {
     /**
      * 新增用户
      */
+    @Log(title = "账号管理", businessType = BusinessType.INSERT)
     @PostMapping
     public Result<?> add(@RequestBody UserSaveDTO dto) {
         userService.addUser(dto);
@@ -53,6 +56,7 @@ public class UserController {
     /**
      * 编辑用户
      */
+    @Log(title = "账号管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public Result<?> update(@RequestBody UserSaveDTO dto) {
         userService.updateUser(dto);
@@ -62,6 +66,7 @@ public class UserController {
     /**
      * 删除用户
      */
+    @Log(title = "账号管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable Long id) {
         userService.deleteUser(id);
@@ -71,6 +76,7 @@ public class UserController {
     /**
      * 切换用户状态
      */
+    @Log(title = "账号管理", businessType = BusinessType.UPDATE)
     @PutMapping("/status")
     public Result<?> changeStatus(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
@@ -82,6 +88,7 @@ public class UserController {
     /**
      * 重置密码（重置为 123456）
      */
+    @Log(title = "账号管理", businessType = BusinessType.UPDATE)
     @PutMapping("/resetPwd")
     public Result<?> resetPwd(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
@@ -92,6 +99,7 @@ public class UserController {
     /**
      * 导出用户列表（CSV 格式，前端 http.download 为 POST 请求）
      */
+    @Log(title = "账号管理", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response) throws Exception {
         List<UserVO> users = userService.getAllUsers();

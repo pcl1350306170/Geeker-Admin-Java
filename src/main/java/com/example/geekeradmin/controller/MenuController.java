@@ -1,5 +1,7 @@
 package com.example.geekeradmin.controller;
 
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.entity.SysMenu;
 import com.example.geekeradmin.service.MenuService;
@@ -29,6 +31,7 @@ public class MenuController {
     /**
      * 新增菜单
      */
+    @Log(title = "菜单管理", businessType = BusinessType.INSERT)
     @PostMapping
     public Result<?> addMenu(@RequestBody SysMenu menu) {
         menuService.addMenu(menu);
@@ -38,6 +41,7 @@ public class MenuController {
     /**
      * 编辑菜单
      */
+    @Log(title = "菜单管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public Result<?> updateMenu(@RequestBody SysMenu menu) {
         menuService.updateMenu(menu);
@@ -47,6 +51,7 @@ public class MenuController {
     /**
      * 删除菜单
      */
+    @Log(title = "菜单管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public Result<?> deleteMenu(@PathVariable Long id) {
         menuService.deleteMenu(id);

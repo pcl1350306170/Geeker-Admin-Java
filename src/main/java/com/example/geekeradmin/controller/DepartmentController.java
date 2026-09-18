@@ -1,5 +1,7 @@
 package com.example.geekeradmin.controller;
 
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.DepartmentQueryDTO;
 import com.example.geekeradmin.dto.DepartmentSaveDTO;
@@ -36,6 +38,7 @@ public class DepartmentController {
     /**
      * 新增部门
      */
+    @Log(title = "部门管理", businessType = BusinessType.INSERT)
     @PostMapping
     public Result<?> add(@RequestBody DepartmentSaveDTO dto) {
         departmentService.addDepartment(dto);
@@ -45,6 +48,7 @@ public class DepartmentController {
     /**
      * 编辑部门
      */
+    @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public Result<?> update(@RequestBody DepartmentSaveDTO dto) {
         departmentService.updateDepartment(dto);
@@ -54,6 +58,7 @@ public class DepartmentController {
     /**
      * 删除部门
      */
+    @Log(title = "部门管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
@@ -63,6 +68,7 @@ public class DepartmentController {
     /**
      * 切换部门状态
      */
+    @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @PutMapping("/status")
     public Result<?> changeStatus(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
@@ -74,6 +80,7 @@ public class DepartmentController {
     /**
      * 导出部门列表（CSV 格式，前端 http.download 为 POST 请求）
      */
+    @Log(title = "部门管理", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response) throws Exception {
         List<SysDepartment> departments = departmentService.getAllFlat();

@@ -1,5 +1,7 @@
 package com.example.geekeradmin.controller;
 
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.RoleMenuSaveDTO;
 import com.example.geekeradmin.service.RoleService;
@@ -38,6 +40,7 @@ public class RoleController {
     /**
      * 保存角色的菜单权限
      */
+    @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PostMapping("/menus")
     public Result<?> saveRoleMenus(@RequestBody RoleMenuSaveDTO dto) {
         roleService.saveRoleMenus(dto.getRole(), dto.getMenuIds());

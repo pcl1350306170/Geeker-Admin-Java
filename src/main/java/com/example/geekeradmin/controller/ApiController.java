@@ -1,5 +1,7 @@
 package com.example.geekeradmin.controller;
 
+import com.example.geekeradmin.common.BusinessType;
+import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
 import com.example.geekeradmin.dto.LoginDTO;
 import com.example.geekeradmin.dto.LoginRespDTO;
@@ -29,6 +31,7 @@ public class ApiController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Log(title = "用户登录", businessType = BusinessType.LOGIN, logType = 2)
     @PostMapping("/login")
     public Result<LoginRespDTO> login(@RequestBody LoginDTO dto) {
         SysUser user = userService.findByUsername(dto.getUsername());
@@ -74,6 +77,7 @@ public class ApiController {
             buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
             buttons.put("departmentManage", Arrays.asList("add", "edit", "delete", "status"));
             buttons.put("dictManage", Arrays.asList("add", "edit", "delete", "status", "refreshCache"));
+            buttons.put("systemLog", Arrays.asList("delete", "clean", "export"));
         } else {
             // 普通用户：仅保留只读性质的按钮
             buttons.put("useProTable", List.of("export"));
@@ -81,6 +85,7 @@ public class ApiController {
         return Result.success(buttons);
     }
 
+    @Log(title = "用户登出", businessType = BusinessType.LOGOUT, logType = 2)
     @PostMapping("/logout")
     public Result<?> logout() {
         return Result.success(null);
