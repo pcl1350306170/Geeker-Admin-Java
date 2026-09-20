@@ -77,6 +77,7 @@ public class ApiController {
             buttons.put("accountManage", Arrays.asList("add", "edit", "delete", "status", "resetPwd"));
             buttons.put("departmentManage", Arrays.asList("add", "edit", "delete", "status"));
             buttons.put("dictManage", Arrays.asList("add", "edit", "delete", "status", "refreshCache"));
+            buttons.put("timingTask", Arrays.asList("add", "edit", "delete", "status", "run", "clean", "log"));
             buttons.put("systemLog", Arrays.asList("delete", "clean", "export"));
         } else {
             // 普通用户：仅保留只读性质的按钮
