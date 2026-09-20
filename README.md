@@ -2,7 +2,7 @@
 
 [Geeker-Admin](https://github.com/HalseySpicy/Geeker-Admin)（Vue3 + TypeScript + Element-Plus）配套的 **Spring Boot 3** 后端服务。
 
-> 一份"开箱即跑"的中后台脚手架：JWT 鉴权、动态菜单、按钮级权限、部门/字典/账号管理、系统日志、开发资产库、小说家族图谱等业务模块一应俱全。
+> 一份"开箱即跑"的中后台脚手架：JWT 鉴权、动态菜单、按钮级权限、部门/字典/账号管理、系统日志、定时任务、开发资产库、小说家族图谱等业务模块一应俱全。
 
 ---
 
@@ -34,14 +34,15 @@
 | 开发资产库 | `DevAssetController` / `DevAssetTagController` / `DevAssetPublicController` | 代码/方案/踩坑/流程/片段五类资产，标签管理、收藏、复制计数、公开搜索页 |
 | 小说家族 | `NovelController` / `NovelFamilyController` / `NovelFamilyMemberController` / `NovelRelationController` | 小说→家族→成员→关系四级建模，支持关系图谱可视化 |
 | 系统日志 | `LogController` | `@Log` 注解 + AOP 切面自动采集操作/登录/异常三类日志，支持分页查询、详情、删除、按类型清空、CSV 导出 |
+| 定时任务 | `JobController` | Spring `@Scheduled` 线程池动态调度，数据库驱动任务注册；支持增删改查、启停、立即执行、cron 预览、调度日志；`invokeTarget` 反射调用 + 包白名单 |
 
-代码统计：**15 个 Controller / 12 个 Service / 14 个 Entity / 13 个 Mapper / 22 个 DTO / 14 个 VO**，共 **104** 个 Java 文件。
+代码统计：**16 个 Controller / 13 个 Service / 16 个 Entity / 15 个 Mapper / 25 个 DTO / 14 个 VO**，共 **117** 个 Java 文件。
 
-### 数据库表（14 张）
+### 数据库表（16 张）
 
 ```
 sys_user            sys_menu            sys_department      sys_log
-sys_dict_type       sys_dict_data
+sys_dict_type       sys_dict_data       sys_job             sys_job_log
 dev_asset           dev_asset_tag       dev_asset_usage     dev_asset_relation
 novel               novel_family        novel_family_member novel_relation
 ```
@@ -61,7 +62,7 @@ novel               novel_family        novel_family_member novel_relation
 
 **整个项目只需要执行一个 SQL 文件**：[`src/main/resources/geeker_admin_full.sql`](src/main/resources/geeker_admin_full.sql)
 
-它包含：建库 → 建 14 张表 → 灌入全部种子数据（菜单、字典、部门、账号、演示用小说家族）。**幂等**，可重复执行。
+它包含：建库 → 建 16 张表 → 灌入全部种子数据（菜单、字典、部门、账号、演示用小说家族、示例定时任务）。**幂等**，可重复执行。
 
 任选一种方式执行：
 
@@ -171,6 +172,7 @@ VITE_API_URL = http://localhost:8880
 | 开发资产库 | `/geeker/devAsset`、`/geeker/devAssetTag` | 资产 CRUD、收藏、标签管理 |
 | 小说家族 | `/geeker/novel`、`/geeker/novelFamily`、`/geeker/novelFamilyMember`、`/geeker/novelRelation` | 四级建模、关系图谱 |
 | 系统日志 | `/geeker/log` | 分页查询、详情、删除、按类型清空、CSV 导出 |
+| 定时任务 | `/geeker/job` | 任务分页/增删改、启停、立即执行、cron 预览、调度日志查询与清空 |
 
 未登录访问鉴权接口时统一返回：
 
@@ -189,20 +191,23 @@ Geeker-Admin-Java/
 ├── src/main/java/com/example/geekeradmin/
 │   ├── GeekerAdminApplication.java     启动类
 │   ├── common/                         Result / GlobalExceptionHandler / @Log 注解 / BusinessType 枚举
-│   ├── config/                         SecurityConfig / MybatisPlusConfig / WebMvcConfig / AsyncConfig（日志异步线程池）
+│   ├── config/                         SecurityConfig / MybatisPlusConfig / WebMvcConfig / AsyncConfig / SchedulingConfig（调度线程池）
 │   ├── aspect/                         LogAspect（@Log 操作日志切面）
 │   ├── filter/                         JwtAuthenticationFilter
-│   ├── util/                           JwtUtil / PasswordEncoderUtil / IpUtil
-│   ├── controller/                     15 个 REST 控制器
-│   ├── service/                        12 个业务服务
-│   ├── mapper/                         13 个 MyBatis-Plus Mapper
-│   ├── entity/                         14 个数据库实体
-│   ├── dto/                            22 个入参对象
+│   ├── schedule/                       ScheduledTaskManager（动态调度核心）
+│   ├── task/                           SampleTask（示例任务处理器）
+│   ├── util/                           JwtUtil / PasswordEncoderUtil / IpUtil / JobInvokeUtil（反射调用+白名单）
+│   ├── controller/                     16 个 REST 控制器
+│   ├── service/                        13 个业务服务
+│   ├── mapper/                         15 个 MyBatis-Plus Mapper
+│   ├── entity/                         16 个数据库实体
+│   ├── dto/                            25 个入参对象
 │   └── vo/                             14 个出参对象
 ├── src/main/resources/
 │   ├── application.yml                 开发配置（端口 8880）
 │   ├── application-prod.yml            生产配置（端口 8881，WSL 路径）
 │   ├── geeker_admin_full.sql           ⭐ 一体化初始化脚本（建库+建表+种子数据）
+│   ├── sys_job_migration.sql           定时任务表增量迁移脚本（老库非破坏式升级）
 │   └── mapper/DevAssetMapper.xml       复杂查询 XML
 └── uploads/                            本地上传目录（运行时生成）
 ```
@@ -254,6 +259,15 @@ Geeker-Admin-Java/
 - **操作人 & IP**：优先从 `SecurityContext` 取当前用户（登录接口无认证时回退取入参 username），IP 经 `IpUtil` 解析 `X-Forwarded-For` 等代理头，适配 nginx 反代；
 - **前端**：`/system/systemLog` 单页 ProTable，按 `log_type` 字典（`sys_log_type`）筛选，支持详情弹窗、删除、按类型清空、CSV 导出（带 BOM 防中文乱码）。
 
+### 7. 定时任务（Spring 动态调度）
+
+- **调度内核**：`SchedulingConfig` 开启 `@EnableScheduling` 并提供 `ThreadPoolTaskScheduler`（池大小 10）；`ScheduledTaskManager` 实现 `ApplicationRunner`，启动时加载 `sys_job` 中 `status=1` 的任务，用 `CronTrigger` 注册到线程池，并持有 `ScheduledFuture` 以便取消/重建；
+- **调用目标**：`invokeTarget` 形如 `beanName.method(args)`，由 `JobInvokeUtil` 反射解析；**安全白名单**限定只能调用 `com.example.geekeradmin.task` 包下的 bean，杜绝任意反射；参数支持字符串/整数/小数/布尔；
+- **并发控制**：`concurrent=1`（禁止）时用 `AtomicBoolean` 保证上一次未结束则跳过本次；
+- **cron 校验/预览**：基于 Spring `CronExpression`（6 段式：秒 分 时 日 月 周），`/previewCron` 返回未来 N 次触发时间；
+- **调度日志**：每次执行写入 `sys_job_log`（执行信息、状态、耗时、异常堆栈）；
+- **示例任务默认暂停**（`status=0`），避免部署后意外执行，需在页面手动启用。
+
 ---
 
 ## 六、部署
@@ -275,7 +289,8 @@ java -jar target/geekeradmin-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 
 ### 数据库迁移
 
-老库升级到最新 schema：直接跑 `geeker_admin_full.sql` 即可（会 DROP 后重建）。**注意备份业务数据**（`dev_asset` / `dev_asset_usage` / `sys_log` 不在种子范围内，会被清空）。
+- **全新部署 / 可接受清库**：直接跑 `geeker_admin_full.sql`（会 DROP 后重建全部 16 张表）。**注意备份业务数据**（`dev_asset` / `dev_asset_usage` / `sys_log` 不在种子范围内，会被清空）。
+- **老库增量升级（不想清库）**：只跑 [`sys_job_migration.sql`](src/main/resources/sys_job_migration.sql) 即可非破坏式地补建 `sys_job` / `sys_job_log` 两张表并插入示例任务；脚本用 `CREATE TABLE IF NOT EXISTS` + `WHERE NOT EXISTS`，**可安全重复执行**。
 
 ---
 
@@ -283,6 +298,7 @@ java -jar target/geekeradmin-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 
 按提交顺序（最新在上）：
 
+- `feat(job)` 定时任务模块（Spring 动态调度 + 反射调用白名单 + cron 预览 + 调度日志）
 - `feat(system)` 系统日志模块（`@Log` 注解 + AOP 切面，操作/登录/异常三类日志）
 - `feat(graph)` 成员关系图添加辈分布局和人物详情面板
 - `feat(system)` 字典管理 + 小说家族功能
