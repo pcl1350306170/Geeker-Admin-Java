@@ -6,9 +6,10 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:mysql://localhost:3307/geeker_admin?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: dev_user
-    password: 123456
+    # 本地 dev 默认值，生产环境通过环境变量覆盖（见 application-prod.yml）
+    url: ${DB_URL:jdbc:mysql://localhost:3307/geeker_admin?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:dev_user}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
   servlet:
 
@@ -32,5 +33,6 @@ mybatis-plus:
       id-type: auto
 
 jwt:
-  secret: GeekerAdminSecretKeyForJWT2025Secure
-  expiration: 86400000
+  # 仅用于本地 dev 的占位密钥（禁止用于生产）；生产必须由环境变量 JWT_SECRET 注入
+  secret: ${JWT_SECRET:GeekerAdminDevOnlySecretPleaseChangeMe0123456789}
+  expiration: ${JWT_EXPIRATION:86400000}

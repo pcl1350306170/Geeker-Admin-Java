@@ -39,7 +39,9 @@ public class ApiController {
             if (user.getStatus() != null && user.getStatus() == 0) {
                 throw new RuntimeException("该账号已被禁用，请联系管理员");
             }
-            String token = jwtUtil.generateToken(user.getUsername());
+            String role = org.springframework.util.StringUtils.hasText(user.getRole())
+                    ? user.getRole() : RoleService.ROLE_USER;
+            String token = jwtUtil.generateToken(user.getUsername(), role);
             return Result.success(new LoginRespDTO(token));
         }
         throw new RuntimeException("用户名或密码错误");
