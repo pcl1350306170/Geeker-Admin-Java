@@ -13,6 +13,7 @@ import com.example.geekeradmin.mapper.SysDictDataMapper;
 import com.example.geekeradmin.mapper.SysDictTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -83,6 +84,7 @@ public class DictService {
     /**
      * 编辑字典类型（类型编码变化时级联更新字典数据，并清理新旧编码缓存）
      */
+    @Transactional(rollbackFor = Exception.class)
     public void updateDictType(DictTypeSaveDTO dto) {
         if (dto.getId() == null) {
             throw new RuntimeException("字典类型ID不能为空");
@@ -177,6 +179,7 @@ public class DictService {
     /**
      * 新增字典数据
      */
+    @Transactional(rollbackFor = Exception.class)
     public void addDictData(DictDataSaveDTO dto) {
         validateDictData(dto, null);
         SysDictData data = new SysDictData();
@@ -193,6 +196,7 @@ public class DictService {
     /**
      * 编辑字典数据
      */
+    @Transactional(rollbackFor = Exception.class)
     public void updateDictData(DictDataSaveDTO dto) {
         if (dto.getId() == null) {
             throw new RuntimeException("字典数据ID不能为空");

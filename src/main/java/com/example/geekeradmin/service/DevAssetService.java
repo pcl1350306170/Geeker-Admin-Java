@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -122,6 +123,7 @@ public class DevAssetService {
     /**
      * 新增资产
      */
+    @Transactional(rollbackFor = Exception.class)
     public Long addAsset(DevAssetSaveDTO dto) {
         validateSaveDTO(dto);
         DevAsset asset = new DevAsset();
@@ -147,6 +149,7 @@ public class DevAssetService {
     /**
      * 编辑资产
      */
+    @Transactional(rollbackFor = Exception.class)
     public void updateAsset(Long id, DevAssetSaveDTO dto) {
         DevAsset asset = getExistAsset(id);
         validateSaveDTO(dto);
@@ -189,6 +192,7 @@ public class DevAssetService {
     /**
      * 复制上报：usage_count + 1，并记录 COPY 日志
      */
+    @Transactional(rollbackFor = Exception.class)
     public void recordCopy(Long id) {
         getExistAsset(id);
         LambdaUpdateWrapper<DevAsset> wrapper = new LambdaUpdateWrapper<>();

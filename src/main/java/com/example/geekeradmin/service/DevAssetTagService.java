@@ -60,7 +60,7 @@ public class DevAssetTagService {
     /**
      * 修改标签（改名时同步更新所有资产中的标签值）
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateTag(Long id, String name, Integer sort) {
         DevAssetTag tag = tagMapper.selectById(id);
         if (tag == null) {

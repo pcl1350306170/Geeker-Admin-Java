@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -175,6 +176,7 @@ public class NovelFamilyMemberService {
     /**
      * 删除成员：逻辑删除成员并级联逻辑删除其相关关系
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deleteMember(Long id) {
         getExistMember(id);
         LambdaUpdateWrapper<NovelFamilyMember> memberWrapper = new LambdaUpdateWrapper<>();

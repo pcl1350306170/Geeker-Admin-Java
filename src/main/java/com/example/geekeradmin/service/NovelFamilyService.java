@@ -19,6 +19,7 @@ import com.example.geekeradmin.vo.FamilyListVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -157,6 +158,7 @@ public class NovelFamilyService {
     /**
      * 删除家族：家族下存在成员时禁止删除；否则逻辑删除家族并级联逻辑删除其家族间关系
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFamily(Long id) {
         getExistFamily(id);
         LambdaQueryWrapper<NovelFamilyMember> memberWrapper = new LambdaQueryWrapper<>();

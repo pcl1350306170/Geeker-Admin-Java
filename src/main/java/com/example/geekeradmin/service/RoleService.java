@@ -4,6 +4,7 @@ import com.example.geekeradmin.entity.SysMenu;
 import com.example.geekeradmin.mapper.SysMenuMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -62,6 +63,7 @@ public class RoleService {
     /**
      * 保存角色的菜单权限：批量更新 sys_menu.roles（admin 始终保留）
      */
+    @Transactional(rollbackFor = Exception.class)
     public void saveRoleMenus(String role, List<Long> menuIds) {
         if (!ROLE_USER.equals(role)) {
             throw new RuntimeException("超级管理员默认拥有全部菜单，不允许修改");
