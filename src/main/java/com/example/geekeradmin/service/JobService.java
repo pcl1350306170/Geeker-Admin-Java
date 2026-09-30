@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.geekeradmin.dto.JobLogQueryDTO;
@@ -83,12 +84,12 @@ public class JobService {
      */
     public void updateJob(JobSaveDTO dto) {
         if (dto.getId() == null) {
-            throw new RuntimeException("任务ID不能为空");
+            throw new BusinessException("任务ID不能为空");
         }
         validate(dto);
         SysJob exist = sysJobMapper.selectById(dto.getId());
         if (exist == null) {
-            throw new RuntimeException("任务不存在");
+            throw new BusinessException("任务不存在");
         }
         SysJob job = new SysJob();
         BeanUtils.copyProperties(dto, job);
@@ -113,7 +114,7 @@ public class JobService {
     public void changeStatus(Long id, Integer status) {
         SysJob exist = sysJobMapper.selectById(id);
         if (exist == null) {
-            throw new RuntimeException("任务不存在");
+            throw new BusinessException("任务不存在");
         }
         SysJob job = new SysJob();
         job.setId(id);
@@ -134,7 +135,7 @@ public class JobService {
     public void runOnce(Long id) {
         SysJob job = sysJobMapper.selectById(id);
         if (job == null) {
-            throw new RuntimeException("任务不存在");
+            throw new BusinessException("任务不存在");
         }
         scheduledTaskManager.runOnce(job);
     }
@@ -182,10 +183,10 @@ public class JobService {
 
     private void validate(JobSaveDTO dto) {
         if (!StringUtils.hasText(dto.getJobName())) {
-            throw new RuntimeException("任务名称不能为空");
+            throw new BusinessException("任务名称不能为空");
         }
         if (!StringUtils.hasText(dto.getInvokeTarget())) {
-            throw new RuntimeException("调用目标不能为空");
+            throw new BusinessException("调用目标不能为空");
         }
         scheduledTaskManager.validateCron(dto.getCronExpression());
     }

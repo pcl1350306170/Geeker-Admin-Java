@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -174,7 +175,7 @@ public class NovelRelationService {
     public GraphVO getMemberGraph(Long familyId) {
         NovelFamily family = familyMapper.selectById(familyId);
         if (family == null || (family.getDeleted() != null && family.getDeleted() == 1)) {
-            throw new RuntimeException("家族不存在或已被删除");
+            throw new BusinessException("家族不存在或已被删除");
         }
         List<NovelFamilyMember> members = memberMapper.selectList(new LambdaQueryWrapper<NovelFamilyMember>()
                 .eq(NovelFamilyMember::getDeleted, 0)
@@ -216,42 +217,42 @@ public class NovelRelationService {
 
     private void validateSaveDTO(RelationSaveDTO dto) {
         if (!ENTITY_TYPES.contains(dto.getSourceType()) || !ENTITY_TYPES.contains(dto.getTargetType())) {
-            throw new RuntimeException("关系端类型不合法：仅支持 MEMBER（成员）或 FAMILY（家族）");
+            throw new BusinessException("关系端类型不合法：仅支持 MEMBER（成员）或 FAMILY（家族）");
         }
         if (!dto.getSourceType().equals(dto.getTargetType())) {
-            throw new RuntimeException("关系两端类型必须一致：成员与成员，或家族与家族");
+            throw new BusinessException("关系两端类型必须一致：成员与成员，或家族与家族");
         }
         if (dto.getSourceId() == null || dto.getTargetId() == null) {
-            throw new RuntimeException("关系两端ID不能为空");
+            throw new BusinessException("关系两端ID不能为空");
         }
         if (dto.getSourceId().equals(dto.getTargetId())) {
-            throw new RuntimeException("关系两端不能是同一对象");
+            throw new BusinessException("关系两端不能是同一对象");
         }
         if (!StringUtils.hasText(dto.getRelationType())) {
-            throw new RuntimeException("关系类型不能为空");
+            throw new BusinessException("关系类型不能为空");
         }
         if (StringUtils.hasText(dto.getStatus()) && !STATUSES.contains(dto.getStatus())) {
-            throw new RuntimeException("关系状态不合法：仅支持 ACTIVE（存续）或 BROKEN（破裂）");
+            throw new BusinessException("关系状态不合法：仅支持 ACTIVE（存续）或 BROKEN（破裂）");
         }
         if (TYPE_MEMBER.equals(dto.getSourceType())) {
             NovelFamilyMember source = memberMapper.selectById(dto.getSourceId());
             NovelFamilyMember target = memberMapper.selectById(dto.getTargetId());
             if (source == null || (source.getDeleted() != null && source.getDeleted() == 1)
                     || target == null || (target.getDeleted() != null && target.getDeleted() == 1)) {
-                throw new RuntimeException("关系两端成员不存在或已被删除");
+                throw new BusinessException("关系两端成员不存在或已被删除");
             }
             if (!java.util.Objects.equals(source.getNovelId(), target.getNovelId())) {
-                throw new RuntimeException("关系两端成员必须属于同一部小说");
+                throw new BusinessException("关系两端成员必须属于同一部小说");
             }
         } else {
             NovelFamily source = familyMapper.selectById(dto.getSourceId());
             NovelFamily target = familyMapper.selectById(dto.getTargetId());
             if (source == null || (source.getDeleted() != null && source.getDeleted() == 1)
                     || target == null || (target.getDeleted() != null && target.getDeleted() == 1)) {
-                throw new RuntimeException("关系两端家族不存在或已被删除");
+                throw new BusinessException("关系两端家族不存在或已被删除");
             }
             if (!java.util.Objects.equals(source.getNovelId(), target.getNovelId())) {
-                throw new RuntimeException("关系两端家族必须属于同一部小说");
+                throw new BusinessException("关系两端家族必须属于同一部小说");
             }
         }
         // 重复校验：同方向与反方向均视为重复
@@ -268,14 +269,14 @@ public class NovelRelationService {
                 .eq(NovelRelation::getTargetId, dto.getSourceId())
                 .eq(NovelRelation::getRelationType, dto.getRelationType());
         if (relationMapper.selectCount(fwd) > 0 || relationMapper.selectCount(rev) > 0) {
-            throw new RuntimeException("该关系已存在，请勿重复添加");
+            throw new BusinessException("该关系已存在，请勿重复添加");
         }
     }
 
     private NovelRelation getExistRelation(Long id) {
         NovelRelation relation = relationMapper.selectById(id);
         if (relation == null || (relation.getDeleted() != null && relation.getDeleted() == 1)) {
-            throw new RuntimeException("关系不存在或已被删除");
+            throw new BusinessException("关系不存在或已被删除");
         }
         return relation;
     }

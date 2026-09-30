@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -260,17 +261,17 @@ public class DevAssetService {
     private DevAsset getExistAsset(Long id) {
         DevAsset asset = assetMapper.selectById(id);
         if (asset == null || (asset.getDeleted() != null && asset.getDeleted() == 1)) {
-            throw new RuntimeException("资产不存在或已被删除");
+            throw new BusinessException("资产不存在或已被删除");
         }
         return asset;
     }
 
     private void validateSaveDTO(DevAssetSaveDTO dto) {
         if (!StringUtils.hasText(dto.getTitle())) {
-            throw new RuntimeException("标题不能为空");
+            throw new BusinessException("标题不能为空");
         }
         if (!StringUtils.hasText(dto.getType()) || !ASSET_TYPES.contains(dto.getType())) {
-            throw new RuntimeException("资产类型不合法");
+            throw new BusinessException("资产类型不合法");
         }
     }
 
@@ -366,7 +367,7 @@ public class DevAssetService {
                     .distinct()
                     .toList());
         } catch (Exception e) {
-            throw new RuntimeException("标签序列化失败");
+            throw new BusinessException("标签序列化失败");
         }
     }
 

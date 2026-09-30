@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.example.geekeradmin.entity.SysMenu;
 import com.example.geekeradmin.mapper.SysMenuMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class RoleService {
      */
     public List<Long> getRoleMenuIds(String role) {
         if (!isValidRole(role)) {
-            throw new RuntimeException("角色不存在：" + role);
+            throw new BusinessException("角色不存在：" + role);
         }
         List<SysMenu> allMenus = menuMapper.selectList(null);
         if (ROLE_ADMIN.equals(role)) {
@@ -66,7 +67,7 @@ public class RoleService {
     @Transactional(rollbackFor = Exception.class)
     public void saveRoleMenus(String role, List<Long> menuIds) {
         if (!ROLE_USER.equals(role)) {
-            throw new RuntimeException("超级管理员默认拥有全部菜单，不允许修改");
+            throw new BusinessException("超级管理员默认拥有全部菜单，不允许修改");
         }
         Set<Long> selectedIds = menuIds == null ? Set.of() : new HashSet<>(menuIds);
         List<SysMenu> allMenus = menuMapper.selectList(null);

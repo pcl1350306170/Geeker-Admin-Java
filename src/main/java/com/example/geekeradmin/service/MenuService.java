@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.geekeradmin.entity.MenuMeta;
 import com.example.geekeradmin.entity.SysMenu;
@@ -76,7 +77,7 @@ public class MenuService {
      */
     public void addMenu(SysMenu menu) {
         if (!StringUtils.hasText(menu.getTitle())) {
-            throw new RuntimeException("菜单标题不能为空");
+            throw new BusinessException("菜单标题不能为空");
         }
         if (menu.getParentId() == null) {
             menu.setParentId(0L);
@@ -95,10 +96,10 @@ public class MenuService {
      */
     public void updateMenu(SysMenu menu) {
         if (menu.getId() == null) {
-            throw new RuntimeException("菜单ID不能为空");
+            throw new BusinessException("菜单ID不能为空");
         }
         if (menu.getParentId() != null && menu.getParentId().equals(menu.getId())) {
-            throw new RuntimeException("上级菜单不能选择自己");
+            throw new BusinessException("上级菜单不能选择自己");
         }
         menuMapper.updateById(menu);
     }
@@ -109,12 +110,12 @@ public class MenuService {
     public void deleteMenu(Long id) {
         SysMenu menu = menuMapper.selectById(id);
         if (menu == null) {
-            throw new RuntimeException("菜单不存在");
+            throw new BusinessException("菜单不存在");
         }
         LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysMenu::getParentId, id);
         if (menuMapper.selectCount(wrapper) > 0) {
-            throw new RuntimeException("该菜单存在子菜单，请先删除子菜单");
+            throw new BusinessException("该菜单存在子菜单，请先删除子菜单");
         }
         menuMapper.deleteById(id);
     }

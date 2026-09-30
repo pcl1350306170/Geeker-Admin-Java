@@ -1,5 +1,6 @@
 package com.example.geekeradmin.controller;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.example.geekeradmin.common.Result;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -112,7 +113,7 @@ public class FileController {
      */
     private String saveFile(MultipartFile file, Set<String> allowedExtensions) {
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("上传文件不能为空");
+            throw new BusinessException("上传文件不能为空");
         }
         String originalName = file.getOriginalFilename();
         String extension = "";
@@ -123,7 +124,7 @@ public class FileController {
             extension = MIME_EXTENSION_MAP.getOrDefault(file.getContentType().toLowerCase(), "");
         }
         if (!allowedExtensions.contains(extension)) {
-            throw new RuntimeException("不支持的文件类型：" + extension);
+            throw new BusinessException("不支持的文件类型：" + extension);
         }
         try {
             Path dir = Paths.get(uploadPath).toAbsolutePath().normalize();
@@ -132,7 +133,7 @@ public class FileController {
             file.transferTo(dir.resolve(fileName).toFile());
             return fileName;
         } catch (IOException e) {
-            throw new RuntimeException("文件保存失败：" + e.getMessage());
+            throw new BusinessException("文件保存失败：" + e.getMessage());
         }
     }
 }

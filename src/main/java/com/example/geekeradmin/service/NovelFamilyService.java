@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -164,7 +165,7 @@ public class NovelFamilyService {
         LambdaQueryWrapper<NovelFamilyMember> memberWrapper = new LambdaQueryWrapper<>();
         memberWrapper.eq(NovelFamilyMember::getDeleted, 0).eq(NovelFamilyMember::getFamilyId, id);
         if (memberMapper.selectCount(memberWrapper) > 0) {
-            throw new RuntimeException("该家族下仍有成员，请先移除成员后再删除");
+            throw new BusinessException("该家族下仍有成员，请先移除成员后再删除");
         }
         LambdaUpdateWrapper<NovelFamily> familyWrapper = new LambdaUpdateWrapper<>();
         familyWrapper.eq(NovelFamily::getId, id).set(NovelFamily::getDeleted, 1)
@@ -187,21 +188,21 @@ public class NovelFamilyService {
     private NovelFamily getExistFamily(Long id) {
         NovelFamily family = familyMapper.selectById(id);
         if (family == null || (family.getDeleted() != null && family.getDeleted() == 1)) {
-            throw new RuntimeException("家族不存在或已被删除");
+            throw new BusinessException("家族不存在或已被删除");
         }
         return family;
     }
 
     private void validateSaveDTO(FamilySaveDTO dto) {
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("家族名称不能为空");
+            throw new BusinessException("家族名称不能为空");
         }
         if (dto.getNovelId() == null) {
-            throw new RuntimeException("所属小说不能为空");
+            throw new BusinessException("所属小说不能为空");
         }
         Novel novel = novelMapper.selectById(dto.getNovelId());
         if (novel == null || (novel.getDeleted() != null && novel.getDeleted() == 1)) {
-            throw new RuntimeException("所属小说不存在或已被删除");
+            throw new BusinessException("所属小说不存在或已被删除");
         }
     }
 

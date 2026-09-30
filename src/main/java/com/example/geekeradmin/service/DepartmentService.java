@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.geekeradmin.dto.DepartmentQueryDTO;
 import com.example.geekeradmin.dto.DepartmentSaveDTO;
@@ -81,7 +82,7 @@ public class DepartmentService {
      */
     public void addDepartment(DepartmentSaveDTO dto) {
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("部门名称不能为空");
+            throw new BusinessException("部门名称不能为空");
         }
         SysDepartment dept = new SysDepartment();
         dept.setParentId(dto.getParentId() == null ? 0L : dto.getParentId());
@@ -95,7 +96,7 @@ public class DepartmentService {
         dept.setCreateTime(LocalDateTime.now());
         // 校验上级部门是否存在
         if (dept.getParentId() != 0L && departmentMapper.selectById(dept.getParentId()) == null) {
-            throw new RuntimeException("上级部门不存在");
+            throw new BusinessException("上级部门不存在");
         }
         // 校验部门编码唯一
         checkCodeUnique(dto.getCode(), null);
@@ -107,25 +108,25 @@ public class DepartmentService {
      */
     public void updateDepartment(DepartmentSaveDTO dto) {
         if (dto.getId() == null) {
-            throw new RuntimeException("部门ID不能为空");
+            throw new BusinessException("部门ID不能为空");
         }
         SysDepartment exist = departmentMapper.selectById(dto.getId());
         if (exist == null) {
-            throw new RuntimeException("部门不存在");
+            throw new BusinessException("部门不存在");
         }
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("部门名称不能为空");
+            throw new BusinessException("部门名称不能为空");
         }
         Long newParentId = dto.getParentId() == null ? exist.getParentId() : dto.getParentId();
         if (newParentId.equals(dto.getId())) {
-            throw new RuntimeException("上级部门不能选择自己");
+            throw new BusinessException("上级部门不能选择自己");
         }
         // 上级部门不能是自己的子孙部门，否则会造成循环
         if (newParentId != 0L && isDescendant(newParentId, dto.getId())) {
-            throw new RuntimeException("上级部门不能选择自己的下级部门");
+            throw new BusinessException("上级部门不能选择自己的下级部门");
         }
         if (newParentId != 0L && departmentMapper.selectById(newParentId) == null) {
-            throw new RuntimeException("上级部门不存在");
+            throw new BusinessException("上级部门不存在");
         }
         checkCodeUnique(dto.getCode(), dto.getId());
 
@@ -150,12 +151,12 @@ public class DepartmentService {
     public void deleteDepartment(Long id) {
         SysDepartment dept = departmentMapper.selectById(id);
         if (dept == null) {
-            throw new RuntimeException("部门不存在");
+            throw new BusinessException("部门不存在");
         }
         LambdaQueryWrapper<SysDepartment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysDepartment::getParentId, id);
         if (departmentMapper.selectCount(wrapper) > 0) {
-            throw new RuntimeException("该部门存在下级部门，请先删除下级部门");
+            throw new BusinessException("该部门存在下级部门，请先删除下级部门");
         }
         departmentMapper.deleteById(id);
     }
@@ -166,7 +167,7 @@ public class DepartmentService {
     public void changeStatus(Long id, Integer status) {
         SysDepartment dept = departmentMapper.selectById(id);
         if (dept == null) {
-            throw new RuntimeException("部门不存在");
+            throw new BusinessException("部门不存在");
         }
         dept.setStatus(status);
         departmentMapper.updateById(dept);
@@ -182,7 +183,7 @@ public class DepartmentService {
         LambdaQueryWrapper<SysDepartment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysDepartment::getCode, code).ne(excludeId != null, SysDepartment::getId, excludeId);
         if (departmentMapper.selectCount(wrapper) > 0) {
-            throw new RuntimeException("部门编码已存在");
+            throw new BusinessException("部门编码已存在");
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.geekeradmin.entity.DevAsset;
 import com.example.geekeradmin.entity.DevAssetTag;
@@ -47,7 +48,7 @@ public class DevAssetTagService {
     public Long addTag(String name, Integer sort) {
         String trimmed = validateName(name);
         if (existsByName(trimmed, null)) {
-            throw new RuntimeException("标签「" + trimmed + "」已存在");
+            throw new BusinessException("标签「" + trimmed + "」已存在");
         }
         DevAssetTag tag = new DevAssetTag();
         tag.setName(trimmed);
@@ -64,11 +65,11 @@ public class DevAssetTagService {
     public void updateTag(Long id, String name, Integer sort) {
         DevAssetTag tag = tagMapper.selectById(id);
         if (tag == null) {
-            throw new RuntimeException("标签不存在");
+            throw new BusinessException("标签不存在");
         }
         String newName = validateName(name);
         if (!newName.equals(tag.getName()) && existsByName(newName, id)) {
-            throw new RuntimeException("标签「" + newName + "」已存在");
+            throw new BusinessException("标签「" + newName + "」已存在");
         }
         // 改名时同步替换资产 tags JSON 中的旧标签名
         if (!newName.equals(tag.getName())) {
@@ -87,11 +88,11 @@ public class DevAssetTagService {
     public void deleteTag(Long id) {
         DevAssetTag tag = tagMapper.selectById(id);
         if (tag == null) {
-            throw new RuntimeException("标签不存在");
+            throw new BusinessException("标签不存在");
         }
         long usageCount = countAssetByTag(tag.getName());
         if (usageCount > 0) {
-            throw new RuntimeException("标签「" + tag.getName() + "」正在被 " + usageCount + " 个资产使用，请先移除后再删除");
+            throw new BusinessException("标签「" + tag.getName() + "」正在被 " + usageCount + " 个资产使用，请先移除后再删除");
         }
         tagMapper.deleteById(id);
     }
@@ -122,11 +123,11 @@ public class DevAssetTagService {
 
     private String validateName(String name) {
         if (!StringUtils.hasText(name)) {
-            throw new RuntimeException("标签名不能为空");
+            throw new BusinessException("标签名不能为空");
         }
         String trimmed = name.trim();
         if (trimmed.length() > 50) {
-            throw new RuntimeException("标签名长度不能超过 50");
+            throw new BusinessException("标签名长度不能超过 50");
         }
         return trimmed;
     }

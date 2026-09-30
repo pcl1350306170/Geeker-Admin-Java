@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -200,21 +201,21 @@ public class NovelFamilyMemberService {
     private NovelFamilyMember getExistMember(Long id) {
         NovelFamilyMember member = memberMapper.selectById(id);
         if (member == null || (member.getDeleted() != null && member.getDeleted() == 1)) {
-            throw new RuntimeException("成员不存在或已被删除");
+            throw new BusinessException("成员不存在或已被删除");
         }
         return member;
     }
 
     private void validateSaveDTO(MemberSaveDTO dto) {
         if (dto.getFamilyId() == null) {
-            throw new RuntimeException("所属家族不能为空");
+            throw new BusinessException("所属家族不能为空");
         }
         NovelFamily family = familyMapper.selectById(dto.getFamilyId());
         if (family == null || (family.getDeleted() != null && family.getDeleted() == 1)) {
-            throw new RuntimeException("所属家族不存在或已被删除");
+            throw new BusinessException("所属家族不存在或已被删除");
         }
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("成员姓名不能为空");
+            throw new BusinessException("成员姓名不能为空");
         }
     }
 
@@ -290,7 +291,7 @@ public class NovelFamilyMemberService {
                     .distinct()
                     .toList());
         } catch (Exception e) {
-            throw new RuntimeException("性格标签序列化失败");
+            throw new BusinessException("性格标签序列化失败");
         }
     }
 

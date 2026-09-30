@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.geekeradmin.dto.UserQueryDTO;
@@ -73,10 +74,10 @@ public class UserService {
      */
     public void addUser(UserSaveDTO dto) {
         if (findByUsername(dto.getUsername()) != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new BusinessException("用户名已存在");
         }
         if (!StringUtils.hasText(dto.getPassword())) {
-            throw new RuntimeException("密码不能为空");
+            throw new BusinessException("密码不能为空");
         }
         SysUser user = new SysUser();
         user.setUsername(dto.getUsername());
@@ -95,12 +96,12 @@ public class UserService {
     public void updateUser(UserSaveDTO dto) {
         SysUser exist = userMapper.selectById(dto.getId());
         if (exist == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
         // 修改用户名时校验唯一性
         if (StringUtils.hasText(dto.getUsername()) && !dto.getUsername().equals(exist.getUsername())) {
             if (findByUsername(dto.getUsername()) != null) {
-                throw new RuntimeException("用户名已存在");
+                throw new BusinessException("用户名已存在");
             }
             exist.setUsername(dto.getUsername());
         }
@@ -132,10 +133,10 @@ public class UserService {
     public void deleteUser(Long id) {
         SysUser user = userMapper.selectById(id);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
         if (user.getUsername().equals(getCurrentUsername())) {
-            throw new RuntimeException("不能删除当前登录用户");
+            throw new BusinessException("不能删除当前登录用户");
         }
         userMapper.deleteById(id);
     }
@@ -146,10 +147,10 @@ public class UserService {
     public void changeStatus(Long id, Integer status) {
         SysUser user = userMapper.selectById(id);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
         if (user.getUsername().equals(getCurrentUsername()) && status == 0) {
-            throw new RuntimeException("不能禁用当前登录用户");
+            throw new BusinessException("不能禁用当前登录用户");
         }
         user.setStatus(status);
         userMapper.updateById(user);
@@ -161,7 +162,7 @@ public class UserService {
     public void resetPassword(Long id) {
         SysUser user = userMapper.selectById(id);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
         user.setPassword(BCrypt.hashpw(DEFAULT_PASSWORD_MD5, BCrypt.gensalt()));
         userMapper.updateById(user);

@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -65,10 +66,10 @@ public class DictService {
      */
     public void addDictType(DictTypeSaveDTO dto) {
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("字典名称不能为空");
+            throw new BusinessException("字典名称不能为空");
         }
         if (!StringUtils.hasText(dto.getType())) {
-            throw new RuntimeException("字典类型编码不能为空");
+            throw new BusinessException("字典类型编码不能为空");
         }
         checkTypeUnique(dto.getType(), null);
         SysDictType dictType = new SysDictType();
@@ -87,17 +88,17 @@ public class DictService {
     @Transactional(rollbackFor = Exception.class)
     public void updateDictType(DictTypeSaveDTO dto) {
         if (dto.getId() == null) {
-            throw new RuntimeException("字典类型ID不能为空");
+            throw new BusinessException("字典类型ID不能为空");
         }
         SysDictType exist = dictTypeMapper.selectById(dto.getId());
         if (exist == null) {
-            throw new RuntimeException("字典类型不存在");
+            throw new BusinessException("字典类型不存在");
         }
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("字典名称不能为空");
+            throw new BusinessException("字典名称不能为空");
         }
         if (!StringUtils.hasText(dto.getType())) {
-            throw new RuntimeException("字典类型编码不能为空");
+            throw new BusinessException("字典类型编码不能为空");
         }
         checkTypeUnique(dto.getType(), dto.getId());
 
@@ -127,12 +128,12 @@ public class DictService {
     public void deleteDictType(Long id) {
         SysDictType exist = dictTypeMapper.selectById(id);
         if (exist == null) {
-            throw new RuntimeException("字典类型不存在");
+            throw new BusinessException("字典类型不存在");
         }
         LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysDictData::getDictType, exist.getType());
         if (dictDataMapper.selectCount(wrapper) > 0) {
-            throw new RuntimeException("该字典类型下存在字典数据，请先删除字典数据");
+            throw new BusinessException("该字典类型下存在字典数据，请先删除字典数据");
         }
         dictTypeMapper.deleteById(id);
         evictCache(exist.getType());
@@ -144,7 +145,7 @@ public class DictService {
     public void changeDictTypeStatus(Long id, Integer status) {
         SysDictType exist = dictTypeMapper.selectById(id);
         if (exist == null) {
-            throw new RuntimeException("字典类型不存在");
+            throw new BusinessException("字典类型不存在");
         }
         exist.setStatus(status);
         exist.setUpdateTime(LocalDateTime.now());
@@ -156,7 +157,7 @@ public class DictService {
         LambdaQueryWrapper<SysDictType> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysDictType::getType, type).ne(excludeId != null, SysDictType::getId, excludeId);
         if (dictTypeMapper.selectCount(wrapper) > 0) {
-            throw new RuntimeException("字典类型编码已存在");
+            throw new BusinessException("字典类型编码已存在");
         }
     }
 
@@ -199,11 +200,11 @@ public class DictService {
     @Transactional(rollbackFor = Exception.class)
     public void updateDictData(DictDataSaveDTO dto) {
         if (dto.getId() == null) {
-            throw new RuntimeException("字典数据ID不能为空");
+            throw new BusinessException("字典数据ID不能为空");
         }
         SysDictData exist = dictDataMapper.selectById(dto.getId());
         if (exist == null) {
-            throw new RuntimeException("字典数据不存在");
+            throw new BusinessException("字典数据不存在");
         }
         validateDictData(dto, dto.getId());
         String oldDictType = exist.getDictType();
@@ -225,7 +226,7 @@ public class DictService {
     public void deleteDictData(Long id) {
         SysDictData exist = dictDataMapper.selectById(id);
         if (exist == null) {
-            throw new RuntimeException("字典数据不存在");
+            throw new BusinessException("字典数据不存在");
         }
         dictDataMapper.deleteById(id);
         evictCache(exist.getDictType());
@@ -237,7 +238,7 @@ public class DictService {
     public void changeDictDataStatus(Long id, Integer status) {
         SysDictData exist = dictDataMapper.selectById(id);
         if (exist == null) {
-            throw new RuntimeException("字典数据不存在");
+            throw new BusinessException("字典数据不存在");
         }
         exist.setStatus(status);
         exist.setUpdateTime(LocalDateTime.now());
@@ -247,18 +248,18 @@ public class DictService {
 
     private void validateDictData(DictDataSaveDTO dto, Long excludeId) {
         if (!StringUtils.hasText(dto.getDictType())) {
-            throw new RuntimeException("所属字典类型不能为空");
+            throw new BusinessException("所属字典类型不能为空");
         }
         if (!StringUtils.hasText(dto.getLabel())) {
-            throw new RuntimeException("字典标签不能为空");
+            throw new BusinessException("字典标签不能为空");
         }
         if (!StringUtils.hasText(dto.getValue())) {
-            throw new RuntimeException("字典键值不能为空");
+            throw new BusinessException("字典键值不能为空");
         }
         LambdaQueryWrapper<SysDictType> typeWrapper = new LambdaQueryWrapper<>();
         typeWrapper.eq(SysDictType::getType, dto.getDictType());
         if (dictTypeMapper.selectCount(typeWrapper) == 0) {
-            throw new RuntimeException("所属字典类型不存在");
+            throw new BusinessException("所属字典类型不存在");
         }
         // 同一字典类型下键值唯一
         LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<>();
@@ -266,7 +267,7 @@ public class DictService {
                 .eq(SysDictData::getValue, dto.getValue())
                 .ne(excludeId != null, SysDictData::getId, excludeId);
         if (dictDataMapper.selectCount(wrapper) > 0) {
-            throw new RuntimeException("同一字典类型下键值已存在");
+            throw new BusinessException("同一字典类型下键值已存在");
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.geekeradmin.service;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -133,7 +134,7 @@ public class NovelService {
                 .eq(NovelFamily::getDeleted, 0)
                 .eq(NovelFamily::getNovelId, id));
         if (familyCount > 0) {
-            throw new RuntimeException("该小说下仍有家族，请先删除其下家族后再删除");
+            throw new BusinessException("该小说下仍有家族，请先删除其下家族后再删除");
         }
         LambdaUpdateWrapper<Novel> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(Novel::getId, id)
@@ -148,18 +149,18 @@ public class NovelService {
     private Novel getExistNovel(Long id) {
         Novel novel = novelMapper.selectById(id);
         if (novel == null || (novel.getDeleted() != null && novel.getDeleted() == 1)) {
-            throw new RuntimeException("小说不存在或已被删除");
+            throw new BusinessException("小说不存在或已被删除");
         }
         return novel;
     }
 
     private void validateSaveDTO(NovelSaveDTO dto) {
         if (!StringUtils.hasText(dto.getName())) {
-            throw new RuntimeException("小说名称不能为空");
+            throw new BusinessException("小说名称不能为空");
         }
         if (StringUtils.hasText(dto.getStatus()) && !STATUS_ACTIVE.equals(dto.getStatus())
                 && !STATUS_DISABLED.equals(dto.getStatus())) {
-            throw new RuntimeException("小说状态不合法：仅支持 ACTIVE（正常）或 DISABLED（停用）");
+            throw new BusinessException("小说状态不合法：仅支持 ACTIVE（正常）或 DISABLED（停用）");
         }
     }
 

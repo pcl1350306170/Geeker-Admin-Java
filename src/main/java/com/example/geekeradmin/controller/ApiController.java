@@ -1,5 +1,6 @@
 package com.example.geekeradmin.controller;
 
+import com.example.geekeradmin.common.BusinessException;
 import com.example.geekeradmin.common.BusinessType;
 import com.example.geekeradmin.common.Log;
 import com.example.geekeradmin.common.Result;
@@ -37,14 +38,14 @@ public class ApiController {
         SysUser user = userService.findByUsername(dto.getUsername());
         if (user != null && BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
             if (user.getStatus() != null && user.getStatus() == 0) {
-                throw new RuntimeException("该账号已被禁用，请联系管理员");
+                throw new BusinessException("该账号已被禁用，请联系管理员");
             }
             String role = org.springframework.util.StringUtils.hasText(user.getRole())
                     ? user.getRole() : RoleService.ROLE_USER;
             String token = jwtUtil.generateToken(user.getUsername(), role);
             return Result.success(new LoginRespDTO(token));
         }
-        throw new RuntimeException("用户名或密码错误");
+        throw new BusinessException("用户名或密码错误");
     }
 
     @GetMapping("/user/info")
