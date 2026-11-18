@@ -2,10 +2,12 @@ package com.example.geekeradmin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.geekeradmin.common.Result;
+import com.example.geekeradmin.dto.MemberImportDTO;
 import com.example.geekeradmin.dto.MemberQueryDTO;
 import com.example.geekeradmin.dto.MemberSaveDTO;
 import com.example.geekeradmin.service.NovelFamilyMemberService;
 import com.example.geekeradmin.vo.MemberDetailVO;
+import com.example.geekeradmin.vo.MemberImportResultVO;
 import com.example.geekeradmin.vo.MemberListVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +54,15 @@ public class NovelFamilyMemberController {
     public Result<Map<String, Object>> add(@RequestBody MemberSaveDTO dto) {
         Long id = novelFamilyMemberService.addMember(dto);
         return Result.success(Map.of("id", id));
+    }
+
+    /**
+     * 批量导入成员（JSON）
+     * 全量校验通过才写入；校验失败返回 ok=false + 逐条错误明细
+     */
+    @PostMapping("/import")
+    public Result<MemberImportResultVO> importMembers(@RequestBody MemberImportDTO dto) {
+        return Result.success(novelFamilyMemberService.importMembers(dto));
     }
 
     /**
